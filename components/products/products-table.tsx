@@ -1,6 +1,6 @@
 "use client"
 
-import type { Product } from "@/app/(dashboard)/productos/page"
+import type { Product } from "@/contexts/store-context"
 import { Card, CardContent } from "@/components/ui/card"
 import {
   Table,
@@ -27,13 +27,19 @@ type ProductsTableProps = {
   onDelete: (id: string) => void
 }
 
-const statusLabels: Record<Product["status"], string> = {
+function getStatus(product: Product): "disponible" | "bajo_stock" | "agotado" {
+  if (product.stock === 0) return "agotado"
+  if (product.stock <= product.minStock) return "bajo_stock"
+  return "disponible"
+}
+
+const statusLabels = {
   disponible: "Disponible",
   bajo_stock: "Bajo Stock",
   agotado: "Agotado",
 }
 
-const statusVariants: Record<Product["status"], "default" | "secondary" | "destructive" | "outline"> = {
+const statusVariants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   disponible: "default",
   bajo_stock: "secondary",
   agotado: "destructive",
@@ -64,53 +70,56 @@ export function ProductsTable({ products, onEdit, onDelete }: ProductsTableProps
                 </TableCell>
               </TableRow>
             ) : (
-              products.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell>
-                    <div className="flex flex-col">
-                      <span className="font-medium">{product.name}</span>
-                      <span className="text-xs text-muted-foreground">{product.id}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{product.category}</Badge>
-                  </TableCell>
-                  <TableCell className="text-right font-medium">
-                    L {product.price.toLocaleString()}
-                  </TableCell>
-                  <TableCell className="text-center">{product.stock}</TableCell>
-                  <TableCell>
-                    <Badge variant={statusVariants[product.status]}>
-                      {statusLabels[product.status]}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Abrir menú</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => onEdit(product)}>
-                          <Pencil className="mr-2 h-4 w-4" />
-                          Editar
-                        </DropdownMenuItem>
-                        {isAdmin && (
-                          <DropdownMenuItem
-                            onClick={() => onDelete(product.id)}
-                            className="text-destructive focus:text-destructive"
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Eliminar
+              products.map((product) => {
+                const status = getStatus(product)
+                return (
+                  <TableRow key={product.id}>
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{product.name}</span>
+                        <span className="text-xs text-muted-foreground">ID: {product.id}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{product.category}</Badge>
+                    </TableCell>
+                    <TableCell className="text-right font-medium">
+                      L {product.price.toLocaleString()}
+                    </TableCell>
+                    <TableCell className="text-center">{product.stock}</TableCell>
+                    <TableCell>
+                      <Badge variant={statusVariants[status]}>
+                        {statusLabels[status]}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Abrir menú</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => onEdit(product)}>
+                            <Pencil className="mr-2 h-4 w-4" />
+                            Editar
                           </DropdownMenuItem>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))
+                          {isAdmin && (
+                            <DropdownMenuItem
+                              onClick={() => onDelete(product.id)}
+                              className="text-destructive focus:text-destructive"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Eliminar
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                )
+              })
             )}
           </TableBody>
         </Table>

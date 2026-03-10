@@ -7,33 +7,25 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Plus, Search } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
+import { useStore, type Product } from "@/contexts/store-context"
+import { Spinner } from "@/components/ui/spinner"
 
-export type Product = {
-  id: string
-  name: string
-  category: string
-  price: number
-  stock: number
-  status: "disponible" | "bajo_stock" | "agotado"
-}
-
-const initialProducts: Product[] = [
-  { id: "P001", name: "Coca-Cola 600ml", category: "Bebidas", price: 850, stock: 48, status: "disponible" },
-  { id: "P002", name: "Leche Dos Pinos 1L", category: "Lácteos", price: 1200, stock: 24, status: "disponible" },
-  { id: "P003", name: "Arroz Tío Pelón 1kg", category: "Abarrotes", price: 1500, stock: 5, status: "bajo_stock" },
-  { id: "P004", name: "Pan Bimbo Blanco", category: "Panadería", price: 1800, stock: 12, status: "disponible" },
-  { id: "P005", name: "Huevos Docena", category: "Lácteos", price: 2800, stock: 0, status: "agotado" },
-  { id: "P006", name: "Frijoles Negros 1kg", category: "Abarrotes", price: 1350, stock: 18, status: "disponible" },
-  { id: "P007", name: "Aceite Vegetal 1L", category: "Abarrotes", price: 2200, stock: 8, status: "disponible" },
-  { id: "P008", name: "Café Britt 250g", category: "Abarrotes", price: 3500, stock: 3, status: "bajo_stock" },
-]
+export type { Product } from "@/contexts/store-context"
 
 export default function ProductosPage() {
   const { isAdmin } = useAuth()
-  const [products, setProducts] = useState<Product[]>(initialProducts)
+  const { products, isLoaded, addProduct, updateProduct, deleteProduct } = useStore()
   const [searchQuery, setSearchQuery] = useState("")
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+
+  if (!isLoaded) {
+    return (
+      <div className="flex h-96 items-center justify-center">
+        <Spinner className="h-8 w-8 text-primary" />
+      </div>
+    )
+  }
 
   const filteredProducts = products.filter(
     (product) =>
@@ -42,27 +34,19 @@ export default function ProductosPage() {
   )
 
   const handleAddProduct = (product: Omit<Product, "id">) => {
-    const newProduct: Product = {
-      ...product,
-      id: `P${String(products.length + 1).padStart(3, "0")}`,
-    }
-    setProducts([...products, newProduct])
+    addProduct(product)
     setDialogOpen(false)
   }
 
   const handleEditProduct = (product: Omit<Product, "id">) => {
     if (!editingProduct) return
-    setProducts(
-      products.map((p) =>
-        p.id === editingProduct.id ? { ...product, id: editingProduct.id } : p
-      )
-    )
+    updateProduct({ ...product, id: editingProduct.id })
     setEditingProduct(null)
     setDialogOpen(false)
   }
 
   const handleDeleteProduct = (id: string) => {
-    setProducts(products.filter((p) => p.id !== id))
+    deleteProduct(id)
   }
 
   const openEditDialog = (product: Product) => {

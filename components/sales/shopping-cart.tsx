@@ -1,6 +1,6 @@
 "use client"
 
-import type { CartItem } from "@/app/(dashboard)/ventas/page"
+import type { CartItem } from "@/contexts/store-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {

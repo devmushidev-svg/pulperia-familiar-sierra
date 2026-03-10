@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Plus } from "lucide-react"
-import type { Product } from "@/app/(dashboard)/ventas/page"
+import type { Product } from "@/contexts/store-context"
 
 type POSFormProps = {
   products: Product[]

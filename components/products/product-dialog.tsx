@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import type { Product } from "@/app/(dashboard)/productos/page"
+import type { Product } from "@/contexts/store-context"
 import {
   Dialog,
   DialogContent,
@@ -28,13 +28,14 @@ type ProductDialogProps = {
   onSave: (product: Omit<Product, "id">) => void
 }
 
-const categories = ["Bebidas", "Lácteos", "Abarrotes", "Panadería", "Limpieza", "Snacks"]
+const categories = ["Bebidas", "Lácteos", "Abarrotes", "Panadería", "Limpieza", "Snacks", "Huevos"]
 
 export function ProductDialog({ open, onOpenChange, product, onSave }: ProductDialogProps) {
   const [name, setName] = useState("")
   const [category, setCategory] = useState("")
   const [price, setPrice] = useState("")
   const [stock, setStock] = useState("")
+  const [minStock, setMinStock] = useState("")
 
   useEffect(() => {
     if (product) {
@@ -42,29 +43,24 @@ export function ProductDialog({ open, onOpenChange, product, onSave }: ProductDi
       setCategory(product.category)
       setPrice(String(product.price))
       setStock(String(product.stock))
+      setMinStock(String(product.minStock))
     } else {
       setName("")
       setCategory("")
       setPrice("")
       setStock("")
+      setMinStock("10")
     }
   }, [product, open])
 
-  const getStatus = (stockValue: number): Product["status"] => {
-    if (stockValue === 0) return "agotado"
-    if (stockValue <= 5) return "bajo_stock"
-    return "disponible"
-  }
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    const stockValue = parseInt(stock, 10)
     onSave({
       name,
       category,
-      price: parseInt(price, 10),
-      stock: stockValue,
-      status: getStatus(stockValue),
+      price: parseFloat(price),
+      stock: parseInt(stock, 10),
+      minStock: parseInt(minStock, 10),
     })
   }
 
@@ -106,27 +102,40 @@ export function ProductDialog({ open, onOpenChange, product, onSave }: ProductDi
                 </SelectContent>
               </Select>
             </div>
+            <div className="grid gap-2">
+              <Label htmlFor="price">Precio (L)</Label>
+              <Input
+                id="price"
+                type="number"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                placeholder="0"
+                min="0"
+                step="0.01"
+                required
+              />
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="price">Precio (L)</Label>
-                <Input
-                  id="price"
-                  type="number"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  placeholder="0"
-                  min="0"
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="stock">Stock</Label>
+                <Label htmlFor="stock">Stock Actual</Label>
                 <Input
                   id="stock"
                   type="number"
                   value={stock}
                   onChange={(e) => setStock(e.target.value)}
                   placeholder="0"
+                  min="0"
+                  required
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="minStock">Stock Mínimo</Label>
+                <Input
+                  id="minStock"
+                  type="number"
+                  value={minStock}
+                  onChange={(e) => setMinStock(e.target.value)}
+                  placeholder="10"
                   min="0"
                   required
                 />

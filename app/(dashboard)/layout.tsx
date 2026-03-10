@@ -7,6 +7,7 @@ import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/s
 import { Separator } from "@/components/ui/separator"
 import { usePathname } from "next/navigation"
 import { AuthProvider, useAuth } from "@/contexts/auth-context"
+import { StoreProvider } from "@/contexts/store-context"
 import { Spinner } from "@/components/ui/spinner"
 
 const pageNames: Record<string, string> = {
@@ -74,7 +75,9 @@ export default function DashboardLayout({
 }) {
   return (
     <AuthProvider>
-      <DashboardContent>{children}</DashboardContent>
+      <StoreProvider>
+        <DashboardContent>{children}</DashboardContent>
+      </StoreProvider>
     </AuthProvider>
   )
 }

@@ -1,6 +1,6 @@
 "use client"
 
-import type { Sale } from "@/app/(dashboard)/ventas/page"
+import type { Sale } from "@/contexts/store-context"
 import {
   Dialog,
   DialogContent,
