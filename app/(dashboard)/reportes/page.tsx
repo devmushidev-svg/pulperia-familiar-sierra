@@ -4,14 +4,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { DailySalesChart } from "@/components/reports/daily-sales-chart"
 import { TopProductsReport } from "@/components/reports/top-products-report"
 import { InventoryReport } from "@/components/reports/inventory-report"
-import { DollarSign, TrendingUp, Package, ShoppingCart } from "lucide-react"
+import { Banknote, TrendingUp, Package, ShoppingCart } from "lucide-react"
 
 const summaryStats = [
   {
     title: "Ingresos Totales (Mes)",
     value: "L 1,245,680",
     change: "+12.5%",
-    icon: DollarSign,
+    icon: Banknote,
   },
   {
     title: "Ventas Totales (Mes)",

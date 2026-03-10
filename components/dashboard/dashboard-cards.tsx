@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Package, ShoppingCart, DollarSign, AlertTriangle } from "lucide-react"
+import { Package, ShoppingCart, Banknote, AlertTriangle } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 
 const stats = [
@@ -25,7 +25,7 @@ const stats = [
     title: "Ingresos del Día",
     value: "L 45,230",
     description: "+15% vs ayer",
-    icon: DollarSign,
+    icon: Banknote,
     trend: "up",
     adminOnly: true,
   },
