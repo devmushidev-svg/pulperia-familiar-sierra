@@ -19,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react"
+import { useAuth } from "@/contexts/auth-context"
 
 type ProductsTableProps = {
   products: Product[]
@@ -39,6 +40,8 @@ const statusVariants: Record<Product["status"], "default" | "secondary" | "destr
 }
 
 export function ProductsTable({ products, onEdit, onDelete }: ProductsTableProps) {
+  const { isAdmin } = useAuth()
+
   return (
     <Card className="border-border shadow-sm">
       <CardContent className="p-0">
@@ -73,7 +76,7 @@ export function ProductsTable({ products, onEdit, onDelete }: ProductsTableProps
                     <Badge variant="outline">{product.category}</Badge>
                   </TableCell>
                   <TableCell className="text-right font-medium">
-                    ₡{product.price.toLocaleString()}
+                    L {product.price.toLocaleString()}
                   </TableCell>
                   <TableCell className="text-center">{product.stock}</TableCell>
                   <TableCell>
@@ -94,13 +97,15 @@ export function ProductsTable({ products, onEdit, onDelete }: ProductsTableProps
                           <Pencil className="mr-2 h-4 w-4" />
                           Editar
                         </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => onDelete(product.id)}
-                          className="text-destructive focus:text-destructive"
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Eliminar
-                        </DropdownMenuItem>
+                        {isAdmin && (
+                          <DropdownMenuItem
+                            onClick={() => onDelete(product.id)}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Eliminar
+                          </DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

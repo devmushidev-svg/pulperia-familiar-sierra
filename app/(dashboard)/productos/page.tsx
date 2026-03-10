@@ -6,6 +6,7 @@ import { ProductDialog } from "@/components/products/product-dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Plus, Search } from "lucide-react"
+import { useAuth } from "@/contexts/auth-context"
 
 export type Product = {
   id: string
@@ -28,6 +29,7 @@ const initialProducts: Product[] = [
 ]
 
 export default function ProductosPage() {
+  const { isAdmin } = useAuth()
   const [products, setProducts] = useState<Product[]>(initialProducts)
   const [searchQuery, setSearchQuery] = useState("")
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -85,10 +87,12 @@ export default function ProductosPage() {
             className="pl-10"
           />
         </div>
-        <Button onClick={openAddDialog}>
-          <Plus className="mr-2 h-4 w-4" />
-          Agregar Producto
-        </Button>
+        {isAdmin && (
+          <Button onClick={openAddDialog}>
+            <Plus className="mr-2 h-4 w-4" />
+            Agregar Producto
+          </Button>
+        )}
       </div>
 
       <ProductsTable

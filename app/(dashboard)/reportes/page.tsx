@@ -9,7 +9,7 @@ import { DollarSign, TrendingUp, Package, ShoppingCart } from "lucide-react"
 const summaryStats = [
   {
     title: "Ingresos Totales (Mes)",
-    value: "₡1,245,680",
+    value: "L 1,245,680",
     change: "+12.5%",
     icon: DollarSign,
   },
@@ -21,7 +21,7 @@ const summaryStats = [
   },
   {
     title: "Ticket Promedio",
-    value: "₡1,397",
+    value: "L 1,397",
     change: "+3.1%",
     icon: TrendingUp,
   },

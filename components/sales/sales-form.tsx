@@ -91,13 +91,13 @@ export function SalesForm({ products, onSubmit }: SalesFormProps) {
           <div className="grid gap-2">
             <Label>Precio Unitario</Label>
             <div className="flex h-9 items-center rounded-md border border-input bg-muted px-3 text-sm text-muted-foreground">
-              ₡{price.toLocaleString()}
+              L {price.toLocaleString()}
             </div>
           </div>
           <div className="grid gap-2">
             <Label>Total</Label>
             <div className="flex h-9 items-center rounded-md border border-primary/20 bg-primary/5 px-3 text-sm font-semibold text-primary">
-              ₡{total.toLocaleString()}
+              L {total.toLocaleString()}
             </div>
           </div>
           <div className="flex items-end sm:col-span-2 lg:col-span-5">

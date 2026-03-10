@@ -43,7 +43,7 @@ export function DailySalesChart() {
                 axisLine={false}
                 tickLine={false}
                 tick={{ fill: "oklch(0.5 0.01 250)", fontSize: 12 }}
-                tickFormatter={(value) => `₡${value / 1000}k`}
+                tickFormatter={(value) => `L${value / 1000}k`}
               />
               <Tooltip
                 contentStyle={{
@@ -52,7 +52,7 @@ export function DailySalesChart() {
                   borderRadius: "8px",
                   boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
                 }}
-                formatter={(value: number) => [`₡${value.toLocaleString()}`, "Ventas"]}
+                formatter={(value: number) => [`L ${value.toLocaleString()}`, "Ventas"]}
                 labelFormatter={(label) => `Día ${label}`}
                 labelStyle={{ color: "oklch(0.15 0.01 250)", fontWeight: 600 }}
               />

@@ -83,8 +83,8 @@ export function RecentSales() {
                 </TableCell>
                 <TableCell className="font-medium">{sale.product}</TableCell>
                 <TableCell className="text-center">{sale.quantity}</TableCell>
-                <TableCell className="text-right">₡{sale.price.toLocaleString()}</TableCell>
-                <TableCell className="text-right font-medium">₡{sale.total.toLocaleString()}</TableCell>
+                <TableCell className="text-right">L {sale.price.toLocaleString()}</TableCell>
+                <TableCell className="text-right font-medium">L {sale.total.toLocaleString()}</TableCell>
                 <TableCell className="text-right text-muted-foreground">{sale.date}</TableCell>
               </TableRow>
             ))}

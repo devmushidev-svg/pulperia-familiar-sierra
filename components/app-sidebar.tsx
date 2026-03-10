@@ -9,6 +9,7 @@ import {
   BarChart3,
   Settings,
   Store,
+  LogOut,
 } from "lucide-react"
 import {
   Sidebar,
@@ -22,37 +23,49 @@ import {
   SidebarMenuItem,
   SidebarFooter,
 } from "@/components/ui/sidebar"
+import { Button } from "@/components/ui/button"
+import { useAuth } from "@/contexts/auth-context"
 
 const menuItems = [
   {
     title: "Panel de Control",
     url: "/",
     icon: LayoutDashboard,
+    adminOnly: false,
   },
   {
     title: "Productos",
     url: "/productos",
     icon: Package,
+    adminOnly: false,
   },
   {
     title: "Ventas",
     url: "/ventas",
     icon: ShoppingCart,
+    adminOnly: false,
   },
   {
     title: "Reportes",
     url: "/reportes",
     icon: BarChart3,
+    adminOnly: true,
   },
   {
     title: "Configuración",
     url: "/configuracion",
     icon: Settings,
+    adminOnly: true,
   },
 ]
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const { user, logout, isAdmin } = useAuth()
+
+  const visibleMenuItems = menuItems.filter(
+    (item) => !item.adminOnly || isAdmin
+  )
 
   return (
     <Sidebar>
@@ -72,7 +85,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Menú Principal</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
+              {visibleMenuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={pathname === item.url}>
                     <Link href={item.url}>
@@ -89,12 +102,23 @@ export function AppSidebar() {
       <SidebarFooter className="border-t border-sidebar-border p-4">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-sidebar-accent text-sm font-medium text-sidebar-accent-foreground">
-            PS
+            {user?.name.split(" ").map((n) => n[0]).join("").slice(0, 2) || "US"}
           </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-medium text-sidebar-foreground">Propietario</span>
-            <span className="text-xs text-sidebar-foreground/70">Administrador</span>
+          <div className="flex flex-1 flex-col">
+            <span className="text-sm font-medium text-sidebar-foreground">{user?.name || "Usuario"}</span>
+            <span className="text-xs text-sidebar-foreground/70">
+              {isAdmin ? "Administrador" : "Operario"}
+            </span>
           </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={logout}
+            className="h-8 w-8 text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+          >
+            <LogOut className="h-4 w-4" />
+            <span className="sr-only">Cerrar sesión</span>
+          </Button>
         </div>
       </SidebarFooter>
     </Sidebar>

@@ -108,7 +108,7 @@ export function ProductDialog({ open, onOpenChange, product, onSave }: ProductDi
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="price">Precio (₡)</Label>
+                <Label htmlFor="price">Precio (L)</Label>
                 <Input
                   id="price"
                   type="number"

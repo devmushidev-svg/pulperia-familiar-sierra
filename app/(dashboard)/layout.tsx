@@ -1,9 +1,13 @@
 "use client"
 
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
 import { usePathname } from "next/navigation"
+import { AuthProvider, useAuth } from "@/contexts/auth-context"
+import { Spinner } from "@/components/ui/spinner"
 
 const pageNames: Record<string, string> = {
   "/": "Panel de Control",
@@ -13,13 +17,38 @@ const pageNames: Record<string, string> = {
   "/configuracion": "Configuración",
 }
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+function DashboardContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  const router = useRouter()
+  const { user, isLoading, isAdmin } = useAuth()
   const currentPage = pageNames[pathname] || "Panel de Control"
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push("/login")
+    }
+  }, [user, isLoading, router])
+
+  useEffect(() => {
+    // Redirect operators from restricted pages
+    if (!isLoading && user && !isAdmin) {
+      if (pathname === "/reportes" || pathname === "/configuracion") {
+        router.push("/")
+      }
+    }
+  }, [pathname, isLoading, user, isAdmin, router])
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <Spinner className="h-8 w-8 text-primary" />
+      </div>
+    )
+  }
+
+  if (!user) {
+    return null
+  }
 
   return (
     <SidebarProvider>
@@ -35,5 +64,17 @@ export default function DashboardLayout({
         </main>
       </SidebarInset>
     </SidebarProvider>
+  )
+}
+
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <AuthProvider>
+      <DashboardContent>{children}</DashboardContent>
+    </AuthProvider>
   )
 }
