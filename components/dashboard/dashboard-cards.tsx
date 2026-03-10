@@ -3,45 +3,59 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Package, ShoppingCart, Banknote, AlertTriangle } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
-
-const stats = [
-  {
-    title: "Productos Totales",
-    value: "248",
-    description: "+12 este mes",
-    icon: Package,
-    trend: "up",
-    adminOnly: false,
-  },
-  {
-    title: "Ventas del Día",
-    value: "34",
-    description: "+8% vs ayer",
-    icon: ShoppingCart,
-    trend: "up",
-    adminOnly: false,
-  },
-  {
-    title: "Ingresos del Día",
-    value: "L 45,230",
-    description: "+15% vs ayer",
-    icon: Banknote,
-    trend: "up",
-    adminOnly: true,
-  },
-  {
-    title: "Bajo Inventario",
-    value: "8",
-    description: "Requieren atención",
-    icon: AlertTriangle,
-    trend: "warning",
-    adminOnly: false,
-  },
-]
+import { useStore } from "@/contexts/store-context"
 
 export function DashboardCards() {
   const { isAdmin } = useAuth()
+  const { products, sales } = useStore()
+
+  // Calcular estadísticas reales
+  const totalProducts = products.length
+  const todaySales = sales.filter((sale) => {
+    const today = new Date().toLocaleDateString("es-HN")
+    return sale.date.includes(today)
+  })
+  const todaySalesCount = todaySales.length
+  const todayRevenue = todaySales.reduce((sum, sale) => sum + sale.total, 0)
+  const lowStockCount = products.filter((p) => p.stock <= p.stock_minimo).length
+
+  const stats = [
+    {
+      title: "Productos Totales",
+      value: totalProducts.toString(),
+      description: "En inventario",
+      icon: Package,
+      trend: "up",
+      adminOnly: false,
+    },
+    {
+      title: "Ventas del Día",
+      value: todaySalesCount.toString(),
+      description: "Transacciones hoy",
+      icon: ShoppingCart,
+      trend: "up",
+      adminOnly: false,
+    },
+    {
+      title: "Ingresos del Día",
+      value: `L ${todayRevenue.toLocaleString("es-HN", { minimumFractionDigits: 2 })}`,
+      description: "Total facturado",
+      icon: Banknote,
+      trend: "up",
+      adminOnly: true,
+    },
+    {
+      title: "Bajo Inventario",
+      value: lowStockCount.toString(),
+      description: "Requieren atención",
+      icon: AlertTriangle,
+      trend: "warning",
+      adminOnly: false,
+    },
+  ]
+
   const visibleStats = stats.filter((stat) => !stat.adminOnly || isAdmin)
+
   return (
     <div className={`grid gap-4 sm:grid-cols-2 ${isAdmin ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}>
       {visibleStats.map((stat) => (

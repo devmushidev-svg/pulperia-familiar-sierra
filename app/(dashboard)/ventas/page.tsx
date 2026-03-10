@@ -51,10 +51,10 @@ export default function VentasPage() {
     } else {
       const newItem: CartItem = {
         productId: product.id,
-        productName: product.name,
+        productName: product.nombre,
         quantity,
-        price: product.price,
-        subtotal: product.price * quantity,
+        price: product.precio,
+        subtotal: product.precio * quantity,
       }
       setCart([...cart, newItem])
     }
@@ -80,10 +80,10 @@ export default function VentasPage() {
     setCart([])
   }
 
-  const handleFinalizeSale = () => {
+  const handleFinalizeSale = async () => {
     if (cart.length === 0) return
 
-    const newSale = addSale({
+    const newSale = await addSale({
       items: [...cart],
       subtotal,
       tax,

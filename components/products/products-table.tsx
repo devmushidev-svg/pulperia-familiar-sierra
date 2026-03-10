@@ -29,7 +29,7 @@ type ProductsTableProps = {
 
 function getStatus(product: Product): "disponible" | "bajo_stock" | "agotado" {
   if (product.stock === 0) return "agotado"
-  if (product.stock <= product.minStock) return "bajo_stock"
+  if (product.stock <= product.stock_minimo) return "bajo_stock"
   return "disponible"
 }
 
@@ -76,15 +76,15 @@ export function ProductsTable({ products, onEdit, onDelete }: ProductsTableProps
                   <TableRow key={product.id}>
                     <TableCell>
                       <div className="flex flex-col">
-                        <span className="font-medium">{product.name}</span>
+                        <span className="font-medium">{product.nombre}</span>
                         <span className="text-xs text-muted-foreground">ID: {product.id}</span>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline">{product.category}</Badge>
+                      <Badge variant="outline">{product.categoria}</Badge>
                     </TableCell>
                     <TableCell className="text-right font-medium">
-                      L {product.price.toLocaleString()}
+                      L {product.precio.toLocaleString()}
                     </TableCell>
                     <TableCell className="text-center">{product.stock}</TableCell>
                     <TableCell>

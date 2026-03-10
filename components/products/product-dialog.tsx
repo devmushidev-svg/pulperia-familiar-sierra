@@ -28,39 +28,39 @@ type ProductDialogProps = {
   onSave: (product: Omit<Product, "id">) => void
 }
 
-const categories = ["Bebidas", "Lácteos", "Abarrotes", "Panadería", "Limpieza", "Snacks", "Huevos"]
+const categories = ["Bebidas", "Lácteos", "Abarrotes", "Panadería", "Limpieza", "Snacks", "Huevos", "Granos", "Higiene"]
 
 export function ProductDialog({ open, onOpenChange, product, onSave }: ProductDialogProps) {
-  const [name, setName] = useState("")
-  const [category, setCategory] = useState("")
-  const [price, setPrice] = useState("")
+  const [nombre, setNombre] = useState("")
+  const [categoria, setCategoria] = useState("")
+  const [precio, setPrecio] = useState("")
   const [stock, setStock] = useState("")
-  const [minStock, setMinStock] = useState("")
+  const [stockMinimo, setStockMinimo] = useState("")
 
   useEffect(() => {
     if (product) {
-      setName(product.name)
-      setCategory(product.category)
-      setPrice(String(product.price))
+      setNombre(product.nombre)
+      setCategoria(product.categoria)
+      setPrecio(String(product.precio))
       setStock(String(product.stock))
-      setMinStock(String(product.minStock))
+      setStockMinimo(String(product.stock_minimo))
     } else {
-      setName("")
-      setCategory("")
-      setPrice("")
+      setNombre("")
+      setCategoria("")
+      setPrecio("")
       setStock("")
-      setMinStock("10")
+      setStockMinimo("10")
     }
   }, [product, open])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     onSave({
-      name,
-      category,
-      price: parseFloat(price),
+      nombre,
+      categoria,
+      precio: parseFloat(precio),
       stock: parseInt(stock, 10),
-      minStock: parseInt(minStock, 10),
+      stock_minimo: parseInt(stockMinimo, 10),
     })
   }
 
@@ -78,19 +78,19 @@ export function ProductDialog({ open, onOpenChange, product, onSave }: ProductDi
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">Nombre del Producto</Label>
+              <Label htmlFor="nombre">Nombre del Producto</Label>
               <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                id="nombre"
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
                 placeholder="Ej: Coca-Cola 600ml"
                 required
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="category">Categoría</Label>
-              <Select value={category} onValueChange={setCategory} required>
-                <SelectTrigger id="category">
+              <Label htmlFor="categoria">Categoría</Label>
+              <Select value={categoria} onValueChange={setCategoria} required>
+                <SelectTrigger id="categoria">
                   <SelectValue placeholder="Seleccionar categoría" />
                 </SelectTrigger>
                 <SelectContent>
@@ -103,12 +103,12 @@ export function ProductDialog({ open, onOpenChange, product, onSave }: ProductDi
               </Select>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="price">Precio (L)</Label>
+              <Label htmlFor="precio">Precio (L)</Label>
               <Input
-                id="price"
+                id="precio"
                 type="number"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
+                value={precio}
+                onChange={(e) => setPrecio(e.target.value)}
                 placeholder="0"
                 min="0"
                 step="0.01"
@@ -129,12 +129,12 @@ export function ProductDialog({ open, onOpenChange, product, onSave }: ProductDi
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="minStock">Stock Mínimo</Label>
+                <Label htmlFor="stockMinimo">Stock Mínimo</Label>
                 <Input
-                  id="minStock"
+                  id="stockMinimo"
                   type="number"
-                  value={minStock}
-                  onChange={(e) => setMinStock(e.target.value)}
+                  value={stockMinimo}
+                  onChange={(e) => setStockMinimo(e.target.value)}
                   placeholder="10"
                   min="0"
                   required

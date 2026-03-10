@@ -1,15 +1,14 @@
 "use client"
 
-import { createContext, useContext, type ReactNode } from "react"
-import { useLocalStorage } from "@/hooks/use-local-storage"
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react"
 
 export type Product = {
   id: string
-  name: string
-  category: string
-  price: number
+  nombre: string
+  categoria: string
+  precio: number
   stock: number
-  minStock: number
+  stock_minimo: number
 }
 
 export type CartItem = {
@@ -29,81 +28,132 @@ export type Sale = {
   date: string
 }
 
-const initialProducts: Product[] = [
-  { id: "1", name: "Coca-Cola 600ml", category: "Bebidas", price: 25, stock: 48, minStock: 20 },
-  { id: "2", name: "Pepsi 600ml", category: "Bebidas", price: 23, stock: 36, minStock: 20 },
-  { id: "3", name: "Agua Azul 500ml", category: "Bebidas", price: 15, stock: 60, minStock: 24 },
-  { id: "4", name: "Leche Sula 1L", category: "Lácteos", price: 42, stock: 24, minStock: 12 },
-  { id: "5", name: "Leche Dos Pinos 1L", category: "Lácteos", price: 45, stock: 18, minStock: 12 },
-  { id: "6", name: "Queso Crema Sula", category: "Lácteos", price: 38, stock: 15, minStock: 8 },
-  { id: "7", name: "Arroz Tío Pelón 1kg", category: "Abarrotes", price: 28, stock: 40, minStock: 15 },
-  { id: "8", name: "Frijoles Don Pedro 1kg", category: "Abarrotes", price: 35, stock: 32, minStock: 15 },
-  { id: "9", name: "Azúcar Caña Real 1kg", category: "Abarrotes", price: 22, stock: 45, minStock: 20 },
-  { id: "10", name: "Aceite Mazola 750ml", category: "Abarrotes", price: 65, stock: 20, minStock: 10 },
-  { id: "11", name: "Pan Bimbo Blanco", category: "Panadería", price: 48, stock: 12, minStock: 6 },
-  { id: "12", name: "Tortillas de Maíz (12)", category: "Panadería", price: 18, stock: 25, minStock: 10 },
-  { id: "13", name: "Huevos (Docena)", category: "Huevos", price: 85, stock: 30, minStock: 15 },
-  { id: "14", name: "Jabón Xtra 1kg", category: "Limpieza", price: 55, stock: 18, minStock: 8 },
-  { id: "15", name: "Papel Higiénico Scott (4)", category: "Limpieza", price: 45, stock: 22, minStock: 10 },
-]
-
 type StoreContextType = {
   products: Product[]
   sales: Sale[]
   isLoaded: boolean
-  addProduct: (product: Omit<Product, "id">) => void
-  updateProduct: (product: Product) => void
-  deleteProduct: (id: string) => void
-  updateStock: (productId: string, quantity: number) => void
-  addSale: (sale: Omit<Sale, "id">) => Sale
+  refreshProducts: () => Promise<void>
+  refreshSales: () => Promise<void>
+  addProduct: (product: Omit<Product, "id">) => Promise<void>
+  updateProduct: (product: Product) => Promise<void>
+  deleteProduct: (id: string) => Promise<void>
+  addSale: (sale: Omit<Sale, "id">) => Promise<Sale>
   getSaleById: (id: string) => Sale | undefined
 }
 
 const StoreContext = createContext<StoreContextType | null>(null)
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const [products, setProducts, productsLoaded] = useLocalStorage<Product[]>("pulperia-products", initialProducts)
-  const [sales, setSales, salesLoaded] = useLocalStorage<Sale[]>("pulperia-sales", [])
+  const [products, setProducts] = useState<Product[]>([])
+  const [sales, setSales] = useState<Sale[]>([])
+  const [isLoaded, setIsLoaded] = useState(false)
 
-  const isLoaded = productsLoaded && salesLoaded
-
-  const addProduct = (product: Omit<Product, "id">) => {
-    const newProduct: Product = {
-      ...product,
-      id: Date.now().toString(),
+  // Cargar productos desde la API (SQLite)
+  const refreshProducts = useCallback(async () => {
+    try {
+      const response = await fetch("/api/productos")
+      if (response.ok) {
+        const data = await response.json()
+        setProducts(data)
+      }
+    } catch (error) {
+      console.error("Error al cargar productos:", error)
     }
-    setProducts((prev) => [...prev, newProduct])
+  }, [])
+
+  // Cargar ventas desde la API (SQLite)
+  const refreshSales = useCallback(async () => {
+    try {
+      const response = await fetch("/api/ventas")
+      if (response.ok) {
+        const data = await response.json()
+        setSales(data)
+      }
+    } catch (error) {
+      console.error("Error al cargar ventas:", error)
+    }
+  }, [])
+
+  // Cargar datos iniciales
+  useEffect(() => {
+    const loadData = async () => {
+      await Promise.all([refreshProducts(), refreshSales()])
+      setIsLoaded(true)
+    }
+    loadData()
+  }, [refreshProducts, refreshSales])
+
+  // Agregar producto
+  const addProduct = async (product: Omit<Product, "id">) => {
+    const id = Date.now().toString()
+    try {
+      const response = await fetch("/api/productos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, ...product }),
+      })
+      if (response.ok) {
+        await refreshProducts()
+      }
+    } catch (error) {
+      console.error("Error al agregar producto:", error)
+    }
   }
 
-  const updateProduct = (product: Product) => {
-    setProducts((prev) => prev.map((p) => (p.id === product.id ? product : p)))
+  // Actualizar producto
+  const updateProduct = async (product: Product) => {
+    try {
+      const response = await fetch(`/api/productos/${product.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(product),
+      })
+      if (response.ok) {
+        await refreshProducts()
+      }
+    } catch (error) {
+      console.error("Error al actualizar producto:", error)
+    }
   }
 
-  const deleteProduct = (id: string) => {
-    setProducts((prev) => prev.filter((p) => p.id !== id))
+  // Eliminar producto
+  const deleteProduct = async (id: string) => {
+    try {
+      const response = await fetch(`/api/productos/${id}`, {
+        method: "DELETE",
+      })
+      if (response.ok) {
+        await refreshProducts()
+      }
+    } catch (error) {
+      console.error("Error al eliminar producto:", error)
+    }
   }
 
-  const updateStock = (productId: string, quantity: number) => {
-    setProducts((prev) =>
-      prev.map((p) => (p.id === productId ? { ...p, stock: p.stock - quantity } : p))
-    )
-  }
-
-  const addSale = (sale: Omit<Sale, "id">) => {
+  // Agregar venta
+  const addSale = async (sale: Omit<Sale, "id">) => {
     const newSale: Sale = {
       ...sale,
       id: `V-${Date.now().toString().slice(-6)}`,
     }
-    setSales((prev) => [newSale, ...prev])
     
-    // Actualizar stock de productos
-    sale.items.forEach((item) => {
-      updateStock(item.productId, item.quantity)
-    })
+    try {
+      const response = await fetch("/api/ventas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newSale),
+      })
+      if (response.ok) {
+        await Promise.all([refreshProducts(), refreshSales()])
+      }
+    } catch (error) {
+      console.error("Error al registrar venta:", error)
+    }
     
     return newSale
   }
 
+  // Obtener venta por ID
   const getSaleById = (id: string) => {
     return sales.find((s) => s.id === id)
   }
@@ -114,10 +164,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         products,
         sales,
         isLoaded,
+        refreshProducts,
+        refreshSales,
         addProduct,
         updateProduct,
         deleteProduct,
-        updateStock,
         addSale,
         getSaleById,
       }}

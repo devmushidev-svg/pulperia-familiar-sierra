@@ -29,8 +29,8 @@ export default function ProductosPage() {
 
   const filteredProducts = products.filter(
     (product) =>
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.category.toLowerCase().includes(searchQuery.toLowerCase())
+      product.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.categoria.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
   const handleAddProduct = (product: Omit<Product, "id">) => {

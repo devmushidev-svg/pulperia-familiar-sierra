@@ -28,8 +28,8 @@ export function POSForm({ products, onAddToCart }: POSFormProps) {
   useEffect(() => {
     const product = products.find((p) => p.id === selectedProduct)
     if (product) {
-      setPrice(product.price)
-      setSubtotal(product.price * parseInt(quantity || "0", 10))
+      setPrice(product.precio)
+      setSubtotal(product.precio * parseInt(quantity || "0", 10))
     } else {
       setPrice(0)
       setSubtotal(0)
@@ -61,8 +61,8 @@ export function POSForm({ products, onAddToCart }: POSFormProps) {
               {products.map((product) => (
                 <SelectItem key={product.id} value={product.id}>
                   <div className="flex items-center justify-between gap-4">
-                    <span>{product.name}</span>
-                    <span className="text-muted-foreground">L {product.price}</span>
+                    <span>{product.nombre}</span>
+                    <span className="text-muted-foreground">L {product.precio}</span>
                   </div>
                 </SelectItem>
               ))}
