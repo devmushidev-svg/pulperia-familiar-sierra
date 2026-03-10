@@ -29,7 +29,7 @@ export function TopProducts() {
                   </span>
                   <span className="text-sm font-medium text-card-foreground">{product.name}</span>
                 </div>
-                <span className="text-sm text-muted-foreground">{product.sales} uds</span>
+                <span className="text-sm text-muted-foreground">{product.sales} unidades</span>
               </div>
               <Progress value={product.percentage} className="h-2" />
             </div>
