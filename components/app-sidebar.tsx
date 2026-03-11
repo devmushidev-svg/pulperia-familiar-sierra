@@ -10,7 +10,6 @@ import {
   Settings,
   Store,
   LogOut,
-  Database,
 } from "lucide-react"
 import {
   Sidebar,
@@ -56,12 +55,6 @@ const menuItems = [
     title: "Configuración",
     url: "/configuracion",
     icon: Settings,
-    adminOnly: true,
-  },
-  {
-    title: "Base de Datos",
-    url: "/base-datos",
-    icon: Database,
     adminOnly: true,
   },
 ]
