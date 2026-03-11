@@ -80,10 +80,10 @@ export default function VentasPage() {
     setCart([])
   }
 
-  const handleFinalizeSale = async () => {
+  const handleFinalizeSale = () => {
     if (cart.length === 0) return
 
-    const newSale = await addSale({
+    const newSale = addSale({
       items: [...cart],
       subtotal,
       tax,

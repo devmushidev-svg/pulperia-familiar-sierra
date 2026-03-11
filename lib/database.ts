@@ -1,104 +1,318 @@
-"use server"
+// Simulación de base de datos SQLite usando localStorage
+// Estructura las tablas como lo haría una base de datos real
 
-import Database from "better-sqlite3"
-import path from "path"
+export type Product = {
+  id: string
+  nombre: string
+  categoria: string
+  precio: number
+  stock: number
+  stock_minimo: number
+  created_at: string
+  updated_at: string
+}
 
-// El archivo de base de datos se guarda en la raíz del proyecto
-const dbPath = path.join(process.cwd(), "pulperia.db")
+export type Sale = {
+  id: string
+  subtotal: number
+  isv: number
+  total: number
+  fecha: string
+  created_at: string
+}
 
-// Crear conexión a la base de datos
-const db = new Database(dbPath)
+export type SaleDetail = {
+  id: number
+  venta_id: string
+  producto_id: string
+  nombre_producto: string
+  cantidad: number
+  precio_unitario: number
+  subtotal: number
+}
 
-// Habilitar foreign keys
-db.pragma("journal_mode = WAL")
-db.pragma("foreign_keys = ON")
+export type User = {
+  id: string
+  nombre: string
+  email: string
+  password: string
+  rol: "admin" | "operario"
+  created_at: string
+}
 
-// Crear tablas si no existen
-db.exec(`
-  CREATE TABLE IF NOT EXISTS productos (
-    id TEXT PRIMARY KEY,
-    nombre TEXT NOT NULL,
-    categoria TEXT NOT NULL,
-    precio REAL NOT NULL,
-    stock INTEGER NOT NULL DEFAULT 0,
-    stock_minimo INTEGER NOT NULL DEFAULT 5,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-  );
+export type CartItem = {
+  productId: string
+  productName: string
+  quantity: number
+  price: number
+  subtotal: number
+}
 
-  CREATE TABLE IF NOT EXISTS ventas (
-    id TEXT PRIMARY KEY,
-    subtotal REAL NOT NULL,
-    isv REAL NOT NULL,
-    total REAL NOT NULL,
-    fecha TEXT NOT NULL,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP
-  );
+export type SaleWithItems = Sale & {
+  items: CartItem[]
+  tax: number
+  date: string
+}
 
-  CREATE TABLE IF NOT EXISTS detalle_ventas (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    venta_id TEXT NOT NULL,
-    producto_id TEXT NOT NULL,
-    nombre_producto TEXT NOT NULL,
-    cantidad INTEGER NOT NULL,
-    precio_unitario REAL NOT NULL,
-    subtotal REAL NOT NULL,
-    FOREIGN KEY (venta_id) REFERENCES ventas(id) ON DELETE CASCADE
-  );
+// Claves de localStorage para cada "tabla"
+const TABLES = {
+  productos: "pulperia_tabla_productos",
+  ventas: "pulperia_tabla_ventas",
+  detalle_ventas: "pulperia_tabla_detalle_ventas",
+  usuarios: "pulperia_tabla_usuarios",
+}
 
-  CREATE TABLE IF NOT EXISTS usuarios (
-    id TEXT PRIMARY KEY,
-    nombre TEXT NOT NULL,
-    email TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL,
-    rol TEXT NOT NULL CHECK(rol IN ('admin', 'operario')),
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP
-  );
-`)
+// Datos iniciales (como INSERT INTO)
+const INITIAL_PRODUCTS: Product[] = [
+  { id: "1", nombre: "Coca-Cola 600ml", categoria: "Bebidas", precio: 25, stock: 48, stock_minimo: 10, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: "2", nombre: "Leche Sula 1L", categoria: "Lácteos", precio: 32, stock: 24, stock_minimo: 8, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: "3", nombre: "Arroz Progreso 1lb", categoria: "Granos", precio: 18, stock: 36, stock_minimo: 12, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: "4", nombre: "Pan Bimbo Blanco", categoria: "Panadería", precio: 45, stock: 15, stock_minimo: 5, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: "5", nombre: "Huevos Docena", categoria: "Lácteos", precio: 65, stock: 20, stock_minimo: 6, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: "6", nombre: "Frijoles 1lb", categoria: "Granos", precio: 22, stock: 30, stock_minimo: 10, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: "7", nombre: "Aceite Mazola 750ml", categoria: "Aceites", precio: 85, stock: 12, stock_minimo: 4, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: "8", nombre: "Azúcar 1lb", categoria: "Granos", precio: 15, stock: 40, stock_minimo: 15, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+]
 
-// Insertar datos iniciales si la tabla está vacía
-const productCount = db.prepare("SELECT COUNT(*) as count FROM productos").get() as { count: number }
+const INITIAL_USERS: User[] = [
+  { id: "1", nombre: "Carlos Sierra", email: "admin@pulperia.hn", password: "admin123", rol: "admin", created_at: new Date().toISOString() },
+  { id: "2", nombre: "María López", email: "operario@pulperia.hn", password: "operario123", rol: "operario", created_at: new Date().toISOString() },
+]
 
-if (productCount.count === 0) {
-  const insertProduct = db.prepare(`
-    INSERT INTO productos (id, nombre, categoria, precio, stock, stock_minimo)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `)
+// Clase Database que simula operaciones SQL
+class LocalDatabase {
+  private initialized = false
 
-  const initialProducts = [
-    ["1", "Coca-Cola 600ml", "Bebidas", 25, 48, 10],
-    ["2", "Leche Dos Pinos 1L", "Lácteos", 32, 24, 8],
-    ["3", "Arroz Tío Pelón 1kg", "Granos", 28, 36, 12],
-    ["4", "Pan Bimbo Blanco", "Panadería", 45, 15, 5],
-    ["5", "Huevos Docena", "Lácteos", 65, 20, 8],
-    ["6", "Frijoles Rojos 1kg", "Granos", 35, 30, 10],
-    ["7", "Azúcar 1kg", "Abarrotes", 22, 25, 10],
-    ["8", "Aceite Mazola 750ml", "Abarrotes", 85, 18, 6],
-    ["9", "Jabón Protex", "Higiene", 28, 40, 15],
-    ["10", "Papel Higiénico Scott 4pack", "Higiene", 55, 22, 8],
-  ]
-
-  const insertMany = db.transaction((products: (string | number)[][]) => {
-    for (const product of products) {
-      insertProduct.run(...product)
+  // Inicializar la "base de datos"
+  init() {
+    if (this.initialized || typeof window === "undefined") return
+    
+    // CREATE TABLE IF NOT EXISTS productos
+    if (!localStorage.getItem(TABLES.productos)) {
+      localStorage.setItem(TABLES.productos, JSON.stringify(INITIAL_PRODUCTS))
     }
-  })
+    
+    // CREATE TABLE IF NOT EXISTS ventas
+    if (!localStorage.getItem(TABLES.ventas)) {
+      localStorage.setItem(TABLES.ventas, JSON.stringify([]))
+    }
+    
+    // CREATE TABLE IF NOT EXISTS detalle_ventas
+    if (!localStorage.getItem(TABLES.detalle_ventas)) {
+      localStorage.setItem(TABLES.detalle_ventas, JSON.stringify([]))
+    }
+    
+    // CREATE TABLE IF NOT EXISTS usuarios
+    if (!localStorage.getItem(TABLES.usuarios)) {
+      localStorage.setItem(TABLES.usuarios, JSON.stringify(INITIAL_USERS))
+    }
+    
+    this.initialized = true
+  }
 
-  insertMany(initialProducts)
+  // SELECT * FROM productos
+  selectAllProducts(): Product[] {
+    this.init()
+    if (typeof window === "undefined") return INITIAL_PRODUCTS
+    const data = localStorage.getItem(TABLES.productos)
+    return data ? JSON.parse(data) : INITIAL_PRODUCTS
+  }
+
+  // SELECT * FROM productos WHERE id = ?
+  selectProductById(id: string): Product | undefined {
+    const products = this.selectAllProducts()
+    return products.find((p) => p.id === id)
+  }
+
+  // INSERT INTO productos VALUES (...)
+  insertProduct(product: Omit<Product, "id" | "created_at" | "updated_at">): Product {
+    const products = this.selectAllProducts()
+    const newProduct: Product = {
+      ...product,
+      id: String(Date.now()),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }
+    products.push(newProduct)
+    localStorage.setItem(TABLES.productos, JSON.stringify(products))
+    return newProduct
+  }
+
+  // UPDATE productos SET ... WHERE id = ?
+  updateProduct(id: string, updates: Partial<Product>): Product | null {
+    const products = this.selectAllProducts()
+    const index = products.findIndex((p) => p.id === id)
+    if (index === -1) return null
+    
+    products[index] = {
+      ...products[index],
+      ...updates,
+      updated_at: new Date().toISOString(),
+    }
+    localStorage.setItem(TABLES.productos, JSON.stringify(products))
+    return products[index]
+  }
+
+  // DELETE FROM productos WHERE id = ?
+  deleteProduct(id: string): boolean {
+    const products = this.selectAllProducts()
+    const filtered = products.filter((p) => p.id !== id)
+    if (filtered.length === products.length) return false
+    localStorage.setItem(TABLES.productos, JSON.stringify(filtered))
+    return true
+  }
+
+  // SELECT * FROM ventas
+  selectAllSales(): Sale[] {
+    this.init()
+    if (typeof window === "undefined") return []
+    const data = localStorage.getItem(TABLES.ventas)
+    return data ? JSON.parse(data) : []
+  }
+
+  // SELECT * FROM detalle_ventas WHERE venta_id = ?
+  selectSaleDetails(ventaId: string): SaleDetail[] {
+    this.init()
+    if (typeof window === "undefined") return []
+    const data = localStorage.getItem(TABLES.detalle_ventas)
+    const details: SaleDetail[] = data ? JSON.parse(data) : []
+    return details.filter((d) => d.venta_id === ventaId)
+  }
+
+  // INSERT INTO ventas + INSERT INTO detalle_ventas (transacción)
+  insertSale(sale: { items: CartItem[]; subtotal: number; tax: number; total: number; date: string }): SaleWithItems {
+    const sales = this.selectAllSales()
+    const details = this.getAllSaleDetails()
+    
+    const newSale: Sale = {
+      id: String(Date.now()),
+      subtotal: sale.subtotal,
+      isv: sale.tax,
+      total: sale.total,
+      fecha: sale.date,
+      created_at: new Date().toISOString(),
+    }
+    
+    // INSERT INTO ventas
+    sales.push(newSale)
+    localStorage.setItem(TABLES.ventas, JSON.stringify(sales))
+    
+    // INSERT INTO detalle_ventas para cada item
+    let lastDetailId = details.length > 0 ? Math.max(...details.map((d) => d.id)) : 0
+    
+    const newDetails: SaleDetail[] = sale.items.map((item) => ({
+      id: ++lastDetailId,
+      venta_id: newSale.id,
+      producto_id: item.productId,
+      nombre_producto: item.productName,
+      cantidad: item.quantity,
+      precio_unitario: item.price,
+      subtotal: item.subtotal,
+    }))
+    
+    details.push(...newDetails)
+    localStorage.setItem(TABLES.detalle_ventas, JSON.stringify(details))
+    
+    // UPDATE productos SET stock = stock - cantidad (actualizar inventario)
+    sale.items.forEach((item) => {
+      const product = this.selectProductById(item.productId)
+      if (product) {
+        this.updateProduct(item.productId, { stock: product.stock - item.quantity })
+      }
+    })
+    
+    return {
+      ...newSale,
+      items: sale.items,
+      tax: sale.tax,
+      date: sale.date,
+    }
+  }
+
+  // SELECT * FROM detalle_ventas
+  getAllSaleDetails(): SaleDetail[] {
+    this.init()
+    if (typeof window === "undefined") return []
+    const data = localStorage.getItem(TABLES.detalle_ventas)
+    return data ? JSON.parse(data) : []
+  }
+
+  // SELECT * FROM usuarios
+  selectAllUsers(): User[] {
+    this.init()
+    if (typeof window === "undefined") return INITIAL_USERS
+    const data = localStorage.getItem(TABLES.usuarios)
+    return data ? JSON.parse(data) : INITIAL_USERS
+  }
+
+  // SELECT * FROM usuarios WHERE email = ? AND password = ?
+  authenticateUser(email: string, password: string): User | null {
+    const users = this.selectAllUsers()
+    return users.find((u) => u.email === email && u.password === password) || null
+  }
+
+  // Obtener todas las ventas con sus detalles
+  selectAllSalesWithDetails(): SaleWithItems[] {
+    const sales = this.selectAllSales()
+    return sales.map((sale) => {
+      const details = this.selectSaleDetails(sale.id)
+      return {
+        ...sale,
+        items: details.map((d) => ({
+          productId: d.producto_id,
+          productName: d.nombre_producto,
+          quantity: d.cantidad,
+          price: d.precio_unitario,
+          subtotal: d.subtotal,
+        })),
+        tax: sale.isv,
+        date: sale.fecha,
+      }
+    })
+  }
+
+  // Obtener el esquema de las tablas (para mostrar en clase)
+  getSchema(): { tableName: string; columns: string[]; rowCount: number }[] {
+    return [
+      {
+        tableName: "productos",
+        columns: ["id", "nombre", "categoria", "precio", "stock", "stock_minimo", "created_at", "updated_at"],
+        rowCount: this.selectAllProducts().length,
+      },
+      {
+        tableName: "ventas",
+        columns: ["id", "subtotal", "isv", "total", "fecha", "created_at"],
+        rowCount: this.selectAllSales().length,
+      },
+      {
+        tableName: "detalle_ventas",
+        columns: ["id", "venta_id", "producto_id", "nombre_producto", "cantidad", "precio_unitario", "subtotal"],
+        rowCount: this.getAllSaleDetails().length,
+      },
+      {
+        tableName: "usuarios",
+        columns: ["id", "nombre", "email", "password", "rol", "created_at"],
+        rowCount: this.selectAllUsers().length,
+      },
+    ]
+  }
+
+  // Ejecutar "consulta SQL" para mostrar en clase
+  executeQuery(tableName: string): Record<string, unknown>[] {
+    switch (tableName) {
+      case "productos":
+        return this.selectAllProducts()
+      case "ventas":
+        return this.selectAllSales()
+      case "detalle_ventas":
+        return this.getAllSaleDetails()
+      case "usuarios":
+        return this.selectAllUsers().map((u) => ({ ...u, password: "****" }))
+      default:
+        return []
+    }
+  }
 }
 
-// Insertar usuarios por defecto si no existen
-const userCount = db.prepare("SELECT COUNT(*) as count FROM usuarios").get() as { count: number }
-
-if (userCount.count === 0) {
-  const insertUser = db.prepare(`
-    INSERT INTO usuarios (id, nombre, email, password, rol)
-    VALUES (?, ?, ?, ?, ?)
-  `)
-
-  // Contraseñas en texto plano para demo (en producción usar bcrypt)
-  insertUser.run("1", "Carlos Sierra", "admin@pulperia.hn", "admin123", "admin")
-  insertUser.run("2", "María López", "operario@pulperia.hn", "operario123", "operario")
-}
-
-export default db
+// Exportar instancia única
+export const db = new LocalDatabase()

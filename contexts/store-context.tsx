@@ -1,15 +1,9 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react"
+import { db, type Product, type SaleWithItems } from "@/lib/database"
 
-export type Product = {
-  id: string
-  nombre: string
-  categoria: string
-  precio: number
-  stock: number
-  stock_minimo: number
-}
+export type { Product } from "@/lib/database"
 
 export type CartItem = {
   productId: string
@@ -19,26 +13,21 @@ export type CartItem = {
   subtotal: number
 }
 
-export type Sale = {
-  id: string
-  items: CartItem[]
-  subtotal: number
-  tax: number
-  total: number
-  date: string
-}
+export type Sale = SaleWithItems
 
 type StoreContextType = {
   products: Product[]
   sales: Sale[]
   isLoaded: boolean
-  refreshProducts: () => Promise<void>
-  refreshSales: () => Promise<void>
-  addProduct: (product: Omit<Product, "id">) => Promise<void>
-  updateProduct: (product: Product) => Promise<void>
-  deleteProduct: (id: string) => Promise<void>
-  addSale: (sale: Omit<Sale, "id">) => Promise<Sale>
+  refreshProducts: () => void
+  refreshSales: () => void
+  addProduct: (product: Omit<Product, "id" | "created_at" | "updated_at">) => void
+  updateProduct: (product: Product) => void
+  deleteProduct: (id: string) => void
+  addSale: (sale: { items: CartItem[]; subtotal: number; tax: number; total: number; date: string }) => Sale
   getSaleById: (id: string) => Sale | undefined
+  getSchema: () => { tableName: string; columns: string[]; rowCount: number }[]
+  executeQuery: (tableName: string) => Record<string, unknown>[]
 }
 
 const StoreContext = createContext<StoreContextType | null>(null)
@@ -48,114 +37,65 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [sales, setSales] = useState<Sale[]>([])
   const [isLoaded, setIsLoaded] = useState(false)
 
-  // Cargar productos desde la API (SQLite)
-  const refreshProducts = useCallback(async () => {
-    try {
-      const response = await fetch("/api/productos")
-      if (response.ok) {
-        const data = await response.json()
-        setProducts(data)
-      }
-    } catch (error) {
-      console.error("Error al cargar productos:", error)
-    }
+  // SELECT * FROM productos
+  const refreshProducts = useCallback(() => {
+    const data = db.selectAllProducts()
+    setProducts(data)
   }, [])
 
-  // Cargar ventas desde la API (SQLite)
-  const refreshSales = useCallback(async () => {
-    try {
-      const response = await fetch("/api/ventas")
-      if (response.ok) {
-        const data = await response.json()
-        setSales(data)
-      }
-    } catch (error) {
-      console.error("Error al cargar ventas:", error)
-    }
+  // SELECT * FROM ventas con detalles
+  const refreshSales = useCallback(() => {
+    const data = db.selectAllSalesWithDetails()
+    setSales(data)
   }, [])
 
   // Cargar datos iniciales
   useEffect(() => {
-    const loadData = async () => {
-      await Promise.all([refreshProducts(), refreshSales()])
-      setIsLoaded(true)
-    }
-    loadData()
+    db.init()
+    refreshProducts()
+    refreshSales()
+    setIsLoaded(true)
   }, [refreshProducts, refreshSales])
 
-  // Agregar producto
-  const addProduct = async (product: Omit<Product, "id">) => {
-    const id = Date.now().toString()
-    try {
-      const response = await fetch("/api/productos", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, ...product }),
-      })
-      if (response.ok) {
-        await refreshProducts()
-      }
-    } catch (error) {
-      console.error("Error al agregar producto:", error)
-    }
+  // INSERT INTO productos
+  const addProduct = (product: Omit<Product, "id" | "created_at" | "updated_at">) => {
+    db.insertProduct(product)
+    refreshProducts()
   }
 
-  // Actualizar producto
-  const updateProduct = async (product: Product) => {
-    try {
-      const response = await fetch(`/api/productos/${product.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(product),
-      })
-      if (response.ok) {
-        await refreshProducts()
-      }
-    } catch (error) {
-      console.error("Error al actualizar producto:", error)
-    }
+  // UPDATE productos SET ... WHERE id = ?
+  const updateProduct = (product: Product) => {
+    db.updateProduct(product.id, product)
+    refreshProducts()
   }
 
-  // Eliminar producto
-  const deleteProduct = async (id: string) => {
-    try {
-      const response = await fetch(`/api/productos/${id}`, {
-        method: "DELETE",
-      })
-      if (response.ok) {
-        await refreshProducts()
-      }
-    } catch (error) {
-      console.error("Error al eliminar producto:", error)
-    }
+  // DELETE FROM productos WHERE id = ?
+  const deleteProduct = (id: string) => {
+    db.deleteProduct(id)
+    refreshProducts()
   }
 
-  // Agregar venta
-  const addSale = async (sale: Omit<Sale, "id">) => {
-    const newSale: Sale = {
-      ...sale,
-      id: `V-${Date.now().toString().slice(-6)}`,
-    }
-    
-    try {
-      const response = await fetch("/api/ventas", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newSale),
-      })
-      if (response.ok) {
-        await Promise.all([refreshProducts(), refreshSales()])
-      }
-    } catch (error) {
-      console.error("Error al registrar venta:", error)
-    }
-    
+  // INSERT INTO ventas + INSERT INTO detalle_ventas
+  const addSale = (sale: { items: CartItem[]; subtotal: number; tax: number; total: number; date: string }) => {
+    const newSale = db.insertSale(sale)
+    refreshProducts() // Actualizar stock
+    refreshSales()
     return newSale
   }
 
-  // Obtener venta por ID
+  // SELECT * FROM ventas WHERE id = ?
   const getSaleById = (id: string) => {
     return sales.find((s) => s.id === id)
+  }
+
+  // Obtener esquema de tablas (para mostrar en clase)
+  const getSchema = () => {
+    return db.getSchema()
+  }
+
+  // Ejecutar consulta SELECT (para mostrar en clase)
+  const executeQuery = (tableName: string) => {
+    return db.executeQuery(tableName)
   }
 
   return (
@@ -171,6 +111,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         deleteProduct,
         addSale,
         getSaleById,
+        getSchema,
+        executeQuery,
       }}
     >
       {children}
