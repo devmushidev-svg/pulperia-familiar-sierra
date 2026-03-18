@@ -1,5 +1,10 @@
 "use client"
 
+/**
+ * Tabla de productos con búsqueda. Columnas: producto, categoría, precio, stock,
+ * estado. Menú de acciones (editar, eliminar) por fila.
+ */
+
 import type { Product } from "@/contexts/store-context"
 import { Card, CardContent } from "@/components/ui/card"
 import {

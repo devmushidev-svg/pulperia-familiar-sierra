@@ -1,5 +1,10 @@
 "use client"
 
+/**
+ * Página de productos. Tabla con búsqueda. Botón agregar abre ProductDialog.
+ * Menú de acciones por fila: editar, eliminar. Datos desde useStore.
+ */
+
 import { useState } from "react"
 import { ProductsTable } from "@/components/products/products-table"
 import { ProductDialog } from "@/components/products/product-dialog"

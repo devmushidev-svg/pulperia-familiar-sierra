@@ -1,5 +1,10 @@
 "use client"
 
+/**
+ * Tarjetas del panel: productos totales, ventas del día, ingresos del día,
+ * bajo inventario. Filtra ventas por created_at para el día actual.
+ */
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Package, ShoppingCart, Banknote, AlertTriangle } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
@@ -9,7 +14,6 @@ export function DashboardCards() {
   const { isAdmin } = useAuth()
   const { products, sales } = useStore()
 
-  // Calcular estadísticas reales
   const totalProducts = products.length
   const today = new Date()
   const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime()

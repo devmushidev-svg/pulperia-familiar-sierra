@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * Gráfico de ventas diarias del mes actual.
+ *
+ * Proceso: Itera días 1 hasta hoy, filtra ventas por created_at en cada día,
+ * suma totales. Renderiza BarChart con datos reales o mensaje vacío.
+ */
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Bar,

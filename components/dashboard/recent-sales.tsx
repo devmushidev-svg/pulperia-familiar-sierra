@@ -1,5 +1,10 @@
 "use client"
 
+/**
+ * Últimas 5 ventas ordenadas por fecha descendente. Tabla con ID, productos,
+ * items, subtotal, total, fecha.
+ */
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Table,
@@ -14,8 +19,7 @@ import { useStore } from "@/contexts/store-context"
 
 export function RecentSales() {
   const { sales } = useStore()
-  
-  // Obtener las últimas 5 ventas (más recientes primero)
+
   const recentSales = [...sales]
     .sort((a, b) => {
       const dateA = a.created_at ? new Date(a.created_at).getTime() : 0

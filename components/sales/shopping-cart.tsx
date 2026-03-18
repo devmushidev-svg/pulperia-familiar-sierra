@@ -1,5 +1,10 @@
 "use client"
 
+/**
+ * Carrito de compras. Lista items con cantidad editable, botón eliminar.
+ * onRemove y onUpdateQuantity para modificar el carrito.
+ */
+
 import type { CartItem } from "@/contexts/store-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"

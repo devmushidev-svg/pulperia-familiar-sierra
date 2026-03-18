@@ -1,5 +1,10 @@
 "use client"
 
+/**
+ * Top 5 productos más vendidos. Agrupa ventas por productName, suma quantity,
+ * ordena y muestra barra de progreso relativa.
+ */
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { useStore } from "@/contexts/store-context"
@@ -8,7 +13,6 @@ import { useMemo } from "react"
 export function TopProducts() {
   const { sales } = useStore()
 
-  // Calcular productos más vendidos desde las ventas reales
   const topProducts = useMemo(() => {
     const productSales: Record<string, { name: string; sales: number }> = {}
     

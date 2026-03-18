@@ -1,5 +1,13 @@
 "use client"
 
+/**
+ * Pantalla de carga inicial.
+ *
+ * Proceso: Muestra logo, barra de progreso animada y mensajes rotativos (Conectando,
+ * Cargando inventario, etc.). Tras minDuration llama onComplete. Usado por
+ * AppInitializer en la primera visita por sesión.
+ */
+
 import { useState, useEffect } from "react"
 import Image from "next/image"
 
@@ -60,10 +68,8 @@ export function SplashScreen({ onComplete, minDuration = 2500 }: SplashScreenPro
 
   return (
     <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black">
-      {/* Fondo con gradiente sutil */}
       <div className="absolute inset-0 bg-gradient-to-b from-emerald-950/20 via-black to-black" />
 
-      {/* Logo principal */}
       <div className="relative z-10 flex flex-col items-center">
         <div className="mb-8 animate-in fade-in zoom-in-95 duration-700">
           <Image
@@ -76,7 +82,6 @@ export function SplashScreen({ onComplete, minDuration = 2500 }: SplashScreenPro
           />
         </div>
 
-        {/* Barra de progreso */}
         <div className="w-72 max-w-[90vw] space-y-4">
           <div className="h-1.5 overflow-hidden rounded-full bg-zinc-800">
             <div
@@ -85,14 +90,12 @@ export function SplashScreen({ onComplete, minDuration = 2500 }: SplashScreenPro
             />
           </div>
 
-          {/* Texto de carga */}
           <p className="min-h-[1.5rem] text-center text-sm font-medium text-emerald-400/90 animate-in fade-in duration-300">
             {LOADING_STEPS[Math.min(step, LOADING_STEPS.length - 1)]}
           </p>
         </div>
       </div>
 
-      {/* Partículas decorativas */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute left-1/4 top-1/3 h-2 w-2 rounded-full bg-emerald-500/20 animate-pulse" />
         <div className="absolute right-1/3 top-1/2 h-1 w-1 rounded-full bg-emerald-400/30 animate-pulse [animation-delay:300ms]" />

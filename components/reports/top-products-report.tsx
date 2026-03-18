@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * Gráfico de productos más vendidos del mes actual.
+ *
+ * Proceso: Filtra ventas por mes, agrupa por productName sumando quantity,
+ * ordena descendente y toma top 5. Renderiza PieChart o mensaje vacío.
+ */
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   PieChart,

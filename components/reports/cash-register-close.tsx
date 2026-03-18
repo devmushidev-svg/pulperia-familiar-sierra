@@ -1,5 +1,13 @@
 "use client"
 
+/**
+ * Cierre de Caja: resumen diario de ventas.
+ *
+ * Proceso: Filtra ventas del día por created_at, calcula totales (ventas, productos
+ * vendidos, ISV, total). Muestra tarjetas y modal con detalle. handlePrint genera
+ * HTML optimizado para impresora térmica.
+ */
+
 import { useState } from "react"
 import { useStore } from "@/contexts/store-context"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -26,7 +34,6 @@ export function CashRegisterClose() {
   const { sales } = useStore()
   const [showCloseModal, setShowCloseModal] = useState(false)
 
-  // Obtener fecha actual en formato local
   const today = new Date()
   const todayStr = today.toLocaleDateString("es-HN", {
     day: "2-digit",
@@ -34,7 +41,6 @@ export function CashRegisterClose() {
     year: "numeric",
   })
 
-  // Filtrar ventas del dia (usar created_at para consistencia)
   const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime()
   const todayEnd = todayStart + 24 * 60 * 60 * 1000
 
@@ -54,13 +60,11 @@ export function CashRegisterClose() {
     return false
   })
 
-  // Calcular totales
   const totalVentas = todaySales.length
   const subtotalDia = todaySales.reduce((sum, sale) => sum + sale.subtotal, 0)
   const isvDia = todaySales.reduce((sum, sale) => sum + sale.isv, 0)
   const totalDia = todaySales.reduce((sum, sale) => sum + sale.total, 0)
 
-  // Calcular productos vendidos (items usan quantity, no cantidad)
   const productosVendidos = todaySales.reduce((sum, sale) => {
     return sum + sale.items.reduce((itemSum, item) => itemSum + (item.quantity ?? 0), 0)
   }, 0)

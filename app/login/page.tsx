@@ -1,5 +1,10 @@
 "use client"
 
+/**
+ * Página de login. Formulario usuario/contraseña. Valida contra AuthContext,
+ * redirige a / si éxito. Muestra credenciales de prueba.
+ */
+
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/contexts/auth-context"

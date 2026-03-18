@@ -1,5 +1,10 @@
 "use client"
 
+/**
+ * Formulario de selección de producto para el POS. Select de productos,
+ * input cantidad, muestra precio y subtotal. onAddToCart al enviar.
+ */
+
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"

@@ -1,5 +1,10 @@
 "use client"
 
+/**
+ * Panel de control. Tarjetas (productos, ventas del día, ingresos, bajo inventario),
+ * gráfico de ventas semanales, top productos y ventas recientes.
+ */
+
 import { DashboardCards } from "@/components/dashboard/dashboard-cards"
 import { SalesChart } from "@/components/dashboard/sales-chart"
 import { TopProducts } from "@/components/dashboard/top-products"

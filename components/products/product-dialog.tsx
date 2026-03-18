@@ -1,5 +1,10 @@
 "use client"
 
+/**
+ * Diálogo crear/editar producto. Formulario con nombre, categoría, precio,
+ * stock, stock_minimo. onSave persiste vía addProduct o updateProduct.
+ */
+
 import { useEffect, useState } from "react"
 import type { Product } from "@/contexts/store-context"
 import {

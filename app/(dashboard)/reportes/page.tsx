@@ -1,5 +1,11 @@
 "use client"
 
+/**
+ * Página de reportes. Cierre de caja, tarjetas de resumen (ingresos, ventas,
+ * ticket promedio, productos activos), gráfico ventas por día, productos más
+ * vendidos y estado del inventario. Solo admin.
+ */
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DailySalesChart } from "@/components/reports/daily-sales-chart"
 import { TopProductsReport } from "@/components/reports/top-products-report"
@@ -11,7 +17,6 @@ import { Banknote, TrendingUp, Package, ShoppingCart } from "lucide-react"
 export default function ReportesPage() {
   const { products, sales } = useStore()
 
-  // Calcular estadisticas reales
   const totalProductos = products.length
   const totalVentasMes = sales.length
   const ingresosMes = sales.reduce((sum, sale) => sum + sale.total, 0)
@@ -42,10 +47,8 @@ export default function ReportesPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Cierre de Caja */}
       <CashRegisterClose />
 
-      {/* Resumen */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {summaryStats.map((stat) => (
           <Card key={stat.title} className="border-border shadow-sm">

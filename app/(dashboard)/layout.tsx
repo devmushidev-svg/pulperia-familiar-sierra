@@ -1,5 +1,11 @@
 "use client"
 
+/**
+ * Layout del dashboard. AuthProvider + StoreProvider. Si no hay usuario redirige
+ * a /login. Operarios no pueden acceder a /reportes ni /configuracion. Sidebar
+ * + contenido principal.
+ */
+
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
@@ -32,7 +38,6 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   }, [user, isLoading, router])
 
   useEffect(() => {
-    // Redirect operators from restricted pages
     if (!isLoading && user && !isAdmin) {
       if (pathname === "/reportes" || pathname === "/configuracion") {
         router.push("/")

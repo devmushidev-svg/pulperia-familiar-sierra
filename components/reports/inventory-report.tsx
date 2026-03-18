@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * Reporte de estado del inventario.
+ *
+ * Proceso: Obtiene products de useStore. Por cada producto calcula estado (Óptimo,
+ * Bajo, Agotado) según stock vs stock_minimo. Muestra barra de progreso y badge.
+ */
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Table,

@@ -1,5 +1,13 @@
 "use client"
 
+/**
+ * Contexto de autenticación.
+ *
+ * Proceso: Al cargar, lee usuario de localStorage. login valida contra DEMO_USERS,
+ * guarda en estado y localStorage. logout limpia y redirige a /login. isAdmin
+ * determina acceso a reportes y configuración.
+ */
+
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import { useRouter } from "next/navigation"
 
@@ -22,7 +30,6 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-// Usuarios del sistema
 const DEMO_USERS: { username: string; password: string; user: User }[] = [
   {
     username: "admin",

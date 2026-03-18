@@ -1,5 +1,11 @@
 "use client"
 
+/**
+ * Barra lateral de navegación. Logo, menú (Panel, Productos, Ventas, Reportes,
+ * Configuración). Operarios no ven Reportes ni Configuración. Footer con usuario
+ * y logout.
+ */
+
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import Image from "next/image"

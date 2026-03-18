@@ -1,3 +1,8 @@
+/**
+ * Layout raíz. Envuelve la app con AppInitializer (splash en primera visita)
+ * y define metadata e iconos.
+ */
+
 import type { Metadata } from 'next'
 import { Inter, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'

@@ -1,5 +1,13 @@
 "use client"
 
+/**
+ * Página de Ventas (Punto de Venta).
+ *
+ * Proceso: POSForm agrega productos al carrito. ShoppingCart permite editar cantidades.
+ * SaleSummary muestra subtotal, ISV 15% y total. Al finalizar, addSale persiste la venta,
+ * actualiza stock y abre InvoiceModal con la factura imprimible.
+ */
+
 import { useState } from "react"
 import { POSForm } from "@/components/sales/pos-form"
 import { ShoppingCart } from "@/components/sales/shopping-cart"
@@ -29,7 +37,7 @@ export default function VentasPage() {
   }
 
   const subtotal = cart.reduce((sum, item) => sum + item.subtotal, 0)
-  const tax = subtotal * 0.15 // ISV 15%
+  const tax = subtotal * 0.15
   const total = subtotal + tax
 
   const handleAddToCart = (productId: string, quantity: number) => {
@@ -109,7 +117,6 @@ export default function VentasPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* POS Section */}
       <Card className="border-border shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-card-foreground">
@@ -120,12 +127,10 @@ export default function VentasPage() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-6 lg:grid-cols-3">
-            {/* Left: Product Selection */}
             <div className="lg:col-span-1">
               <POSForm products={products} onAddToCart={handleAddToCart} />
             </div>
 
-            {/* Center: Shopping Cart */}
             <div className="lg:col-span-1">
               <ShoppingCart
                 items={cart}
@@ -134,7 +139,6 @@ export default function VentasPage() {
               />
             </div>
 
-            {/* Right: Summary & Actions */}
             <div className="lg:col-span-1">
               <SaleSummary
                 subtotal={subtotal}
@@ -149,10 +153,8 @@ export default function VentasPage() {
         </CardContent>
       </Card>
 
-      {/* Sales History */}
       <SalesHistory sales={sales} onViewInvoice={handleViewInvoice} />
 
-      {/* Invoice Modal */}
       <InvoiceModal
         open={invoiceModalOpen}
         onOpenChange={setInvoiceModalOpen}

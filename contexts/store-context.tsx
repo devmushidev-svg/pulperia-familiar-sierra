@@ -1,5 +1,13 @@
 "use client"
 
+/**
+ * Contexto global de la tienda (productos y ventas).
+ *
+ * Proceso: Al montar, inicializa la base de datos e hidrata el estado con productos
+ * y ventas desde localStorage. Expone operaciones CRUD que delegan en db y refrescan
+ * el estado. addSale además actualiza el stock de productos vendidos.
+ */
+
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react"
 import { db, type Product, type SaleWithItems } from "@/lib/database"
 
@@ -37,13 +45,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [sales, setSales] = useState<Sale[]>([])
   const [isLoaded, setIsLoaded] = useState(false)
 
-  // SELECT * FROM productos
   const refreshProducts = useCallback(() => {
     const data = db.selectAllProducts()
     setProducts(data)
   }, [])
 
-  // SELECT * FROM ventas con detalles
   const refreshSales = useCallback(() => {
     const data = db.selectAllSalesWithDetails()
     setSales(data)
@@ -57,43 +63,36 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setIsLoaded(true)
   }, [refreshProducts, refreshSales])
 
-  // INSERT INTO productos
   const addProduct = (product: Omit<Product, "id" | "created_at" | "updated_at">) => {
     db.insertProduct(product)
     refreshProducts()
   }
 
-  // UPDATE productos SET ... WHERE id = ?
   const updateProduct = (product: Product) => {
     db.updateProduct(product.id, product)
     refreshProducts()
   }
 
-  // DELETE FROM productos WHERE id = ?
   const deleteProduct = (id: string) => {
     db.deleteProduct(id)
     refreshProducts()
   }
 
-  // INSERT INTO ventas + INSERT INTO detalle_ventas
   const addSale = (sale: { items: CartItem[]; subtotal: number; tax: number; total: number; date: string }) => {
     const newSale = db.insertSale(sale)
-    refreshProducts() // Actualizar stock
+    refreshProducts()
     refreshSales()
     return newSale
   }
 
-  // SELECT * FROM ventas WHERE id = ?
   const getSaleById = (id: string) => {
     return sales.find((s) => s.id === id)
   }
 
-  // Obtener esquema de tablas (para mostrar en clase)
   const getSchema = () => {
     return db.getSchema()
   }
 
-  // Ejecutar consulta SELECT (para mostrar en clase)
   const executeQuery = (tableName: string) => {
     return db.executeQuery(tableName)
   }

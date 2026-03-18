@@ -1,5 +1,9 @@
 "use client"
 
+/**
+ * Resumen de la venta: subtotal, ISV 15%, total. Botones Finalizar y Cancelar.
+ */
+
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Check, X, Calculator } from "lucide-react"

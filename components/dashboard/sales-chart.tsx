@@ -1,5 +1,10 @@
 "use client"
 
+/**
+ * Gráfico de ventas de los últimos 7 días. Agrupa ventas por día con created_at,
+ * suma totales. AreaChart con datos reales.
+ */
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Area,

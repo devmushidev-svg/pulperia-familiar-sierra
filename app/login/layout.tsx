@@ -1,5 +1,10 @@
 "use client"
 
+/**
+ * Layout de login. AuthProvider envuelve el contenido. Si hay usuario logueado
+ * redirige a /. Mientras carga auth muestra logo y spinner.
+ */
+
 import { useEffect } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"

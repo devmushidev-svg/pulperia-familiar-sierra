@@ -1,5 +1,13 @@
 "use client"
 
+/**
+ * Modal de factura con impresión térmica.
+ *
+ * Proceso: Muestra resumen de la venta. handlePrint abre ventana nueva con HTML
+ * optimizado para papel 80mm (fuente mono, anchos fijos). El usuario imprime
+ * desde el diálogo del navegador.
+ */
+
 import type { Sale } from "@/contexts/store-context"
 import {
   Dialog,
@@ -45,7 +53,6 @@ export function InvoiceModal({ open, onOpenChange, sale }: InvoiceModalProps) {
           <title>Factura ${sale.id} - Pulpería Familiar Sierra</title>
           <meta charset="UTF-8">
           <style>
-            /* Estilos optimizados para impresora térmica 80mm */
             @page {
               size: 80mm auto;
               margin: 0;

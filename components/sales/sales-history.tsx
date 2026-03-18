@@ -1,5 +1,10 @@
 "use client"
 
+/**
+ * Historial de ventas. Tabla con ID, productos, items, subtotal, total, fecha.
+ * Botón ver factura por venta.
+ */
+
 import type { Sale } from "@/contexts/store-context"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
