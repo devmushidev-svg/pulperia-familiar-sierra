@@ -321,19 +321,14 @@ export function InvoiceModal({ open, onOpenChange, sale }: InvoiceModalProps) {
         </div>
 
         {/* Print Button */}
-        <div className="space-y-2 pt-4">
-          <div className="flex gap-2">
-            <Button onClick={handlePrint} className="flex-1">
-              <Printer className="mr-2 h-4 w-4" />
-              Imprimir Factura
-            </Button>
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Cerrar
-            </Button>
-          </div>
-          <p className="text-xs text-muted-foreground text-center">
-            Impresora térmica 80mm: en el cuadro de impresión seleccione &quot;Tamaño real&quot; o &quot;100%&quot;
-          </p>
+        <div className="flex gap-2 pt-4">
+          <Button onClick={handlePrint} className="flex-1">
+            <Printer className="mr-2 h-4 w-4" />
+            Imprimir Factura
+          </Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cerrar
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
