@@ -34,10 +34,24 @@ export function CashRegisterClose() {
     year: "numeric",
   })
 
-  // Filtrar ventas del dia
+  // Filtrar ventas del dia (usar created_at para consistencia)
+  const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime()
+  const todayEnd = todayStart + 24 * 60 * 60 * 1000
+
   const todaySales = sales.filter((sale) => {
-    const saleDate = sale.fecha.split(",")[0]?.trim()
-    return saleDate === todayStr
+    const saleTime = sale.created_at ? new Date(sale.created_at).getTime() : null
+    if (saleTime !== null) {
+      return saleTime >= todayStart && saleTime < todayEnd
+    }
+    const datePart = sale.fecha?.split(",")[0]?.trim()
+    if (datePart) {
+      const [day, month, year] = datePart.split("/").map(Number)
+      if (day && month && year) {
+        const parsed = new Date(year, month - 1, day).getTime()
+        return parsed >= todayStart && parsed < todayEnd
+      }
+    }
+    return false
   })
 
   // Calcular totales
@@ -46,9 +60,9 @@ export function CashRegisterClose() {
   const isvDia = todaySales.reduce((sum, sale) => sum + sale.isv, 0)
   const totalDia = todaySales.reduce((sum, sale) => sum + sale.total, 0)
 
-  // Calcular productos vendidos
+  // Calcular productos vendidos (items usan quantity, no cantidad)
   const productosVendidos = todaySales.reduce((sum, sale) => {
-    return sum + sale.items.reduce((itemSum, item) => itemSum + item.cantidad, 0)
+    return sum + sale.items.reduce((itemSum, item) => itemSum + (item.quantity ?? 0), 0)
   }, 0)
 
   const handlePrint = () => {
@@ -251,7 +265,7 @@ export function CashRegisterClose() {
                             {sale.fecha.split(",")[1]?.trim() || "-"}
                           </TableCell>
                           <TableCell>
-                            {sale.items.map((item) => item.nombre_producto).join(", ")}
+                            {sale.items.map((item) => item.productName).join(", ")}
                           </TableCell>
                           <TableCell className="text-right">
                             L {sale.subtotal.toLocaleString()}

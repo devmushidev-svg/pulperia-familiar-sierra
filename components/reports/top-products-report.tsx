@@ -9,16 +9,48 @@ import {
   Legend,
   Tooltip,
 } from "recharts"
+import { useStore } from "@/contexts/store-context"
+import { useMemo } from "react"
 
-const data = [
-  { name: "Coca-Cola 600ml", value: 156, color: "oklch(0.55 0.15 160)" },
-  { name: "Leche Dos Pinos", value: 124, color: "oklch(0.6 0.12 200)" },
-  { name: "Arroz Tío Pelón", value: 98, color: "oklch(0.5 0.1 280)" },
-  { name: "Pan Bimbo", value: 87, color: "oklch(0.7 0.15 80)" },
-  { name: "Otros", value: 235, color: "oklch(0.65 0.18 30)" },
+const COLORS = [
+  "oklch(0.55 0.15 160)",
+  "oklch(0.6 0.12 200)",
+  "oklch(0.5 0.1 280)",
+  "oklch(0.7 0.15 80)",
+  "oklch(0.65 0.18 30)",
 ]
 
 export function TopProductsReport() {
+  const { sales } = useStore()
+
+  const data = useMemo(() => {
+    const now = new Date()
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime()
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).getTime()
+
+    const productSales: Record<string, number> = {}
+
+    sales.forEach((sale) => {
+      const saleTime = sale.created_at ? new Date(sale.created_at).getTime() : 0
+      if (saleTime < monthStart || saleTime > monthEnd) return
+
+      sale.items.forEach((item) => {
+        const name = item.productName
+        productSales[name] = (productSales[name] || 0) + item.quantity
+      })
+    })
+
+    const sorted = Object.entries(productSales)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 5)
+      .map(([name, value], i) => ({
+        name,
+        value,
+        color: COLORS[i % COLORS.length],
+      }))
+
+    return sorted
+  }, [sales])
   return (
     <Card className="border-border shadow-sm">
       <CardHeader>
@@ -27,6 +59,11 @@ export function TopProductsReport() {
       </CardHeader>
       <CardContent>
         <div className="h-[300px]">
+          {data.length === 0 ? (
+            <div className="flex h-full items-center justify-center text-muted-foreground">
+              No hay ventas registradas aún
+            </div>
+          ) : (
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -63,6 +100,7 @@ export function TopProductsReport() {
               />
             </PieChart>
           </ResponsiveContainer>
+          )}
         </div>
       </CardContent>
     </Card>

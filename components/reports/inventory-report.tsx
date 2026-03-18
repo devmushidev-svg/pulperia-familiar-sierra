@@ -12,17 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Package } from "lucide-react"
-
-const inventory = [
-  { name: "Coca-Cola 600ml", category: "Bebidas", stock: 48, minStock: 20, status: "optimo" },
-  { name: "Leche Dos Pinos 1L", category: "Lácteos", stock: 24, minStock: 15, status: "optimo" },
-  { name: "Arroz Tío Pelón 1kg", category: "Abarrotes", stock: 5, minStock: 10, status: "bajo" },
-  { name: "Pan Bimbo Blanco", category: "Panadería", stock: 12, minStock: 8, status: "optimo" },
-  { name: "Huevos Docena", category: "Lácteos", stock: 0, minStock: 10, status: "agotado" },
-  { name: "Frijoles Negros 1kg", category: "Abarrotes", stock: 18, minStock: 10, status: "optimo" },
-  { name: "Aceite Vegetal 1L", category: "Abarrotes", stock: 8, minStock: 5, status: "optimo" },
-  { name: "Café Britt 250g", category: "Abarrotes", stock: 3, minStock: 8, status: "bajo" },
-]
+import { useStore } from "@/contexts/store-context"
 
 const statusLabels: Record<string, string> = {
   optimo: "Óptimo",
@@ -36,7 +26,15 @@ const statusVariants: Record<string, "default" | "secondary" | "destructive"> = 
   agotado: "destructive",
 }
 
+function getStockStatus(stock: number, minStock: number): "optimo" | "bajo" | "agotado" {
+  if (stock <= 0) return "agotado"
+  if (stock <= minStock) return "bajo"
+  return "optimo"
+}
+
 export function InventoryReport() {
+  const { products } = useStore()
+
   return (
     <Card className="border-border shadow-sm">
       <CardHeader>
@@ -59,38 +57,49 @@ export function InventoryReport() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {inventory.map((item) => {
-              const percentage = Math.min((item.stock / (item.minStock * 2)) * 100, 100)
-              return (
-                <TableRow key={item.name}>
-                  <TableCell className="font-medium">{item.name}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{item.category}</Badge>
-                  </TableCell>
-                  <TableCell className="text-center">{item.stock}</TableCell>
-                  <TableCell className="text-center text-muted-foreground">{item.minStock}</TableCell>
-                  <TableCell>
-                    <div className="w-24">
-                      <Progress
-                        value={percentage}
-                        className={`h-2 ${
-                          item.status === "agotado"
-                            ? "[&>div]:bg-destructive"
-                            : item.status === "bajo"
-                            ? "[&>div]:bg-warning"
-                            : ""
-                        }`}
-                      />
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={statusVariants[item.status]}>
-                      {statusLabels[item.status]}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-              )
-            })}
+            {products.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                  No hay productos en el inventario
+                </TableCell>
+              </TableRow>
+            ) : (
+              products.map((item) => {
+                const status = getStockStatus(item.stock, item.stock_minimo)
+                const percentage = item.stock_minimo > 0
+                  ? Math.min((item.stock / (item.stock_minimo * 2)) * 100, 100)
+                  : 100
+                return (
+                  <TableRow key={item.id}>
+                    <TableCell className="font-medium">{item.nombre}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{item.categoria}</Badge>
+                    </TableCell>
+                    <TableCell className="text-center">{item.stock}</TableCell>
+                    <TableCell className="text-center text-muted-foreground">{item.stock_minimo}</TableCell>
+                    <TableCell>
+                      <div className="w-24">
+                        <Progress
+                          value={percentage}
+                          className={`h-2 ${
+                            status === "agotado"
+                              ? "[&>div]:bg-destructive"
+                              : status === "bajo"
+                              ? "[&>div]:bg-warning"
+                              : ""
+                          }`}
+                        />
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={statusVariants[status]}>
+                        {statusLabels[status]}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                )
+              })
+            )}
           </TableBody>
         </Table>
       </CardContent>
