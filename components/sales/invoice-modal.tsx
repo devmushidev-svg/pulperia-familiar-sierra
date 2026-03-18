@@ -62,7 +62,8 @@ export function InvoiceModal({ open, onOpenChange, sale }: InvoiceModalProps) {
               margin: 0;
               padding: 0;
               font-family: 'Courier New', Courier, monospace;
-              font-size: 11px;
+              font-size: 13px;
+              font-weight: bold;
               line-height: 1.2;
               color: #000;
               background: #fff;
@@ -90,18 +91,20 @@ export function InvoiceModal({ open, onOpenChange, sale }: InvoiceModalProps) {
               margin-bottom: 4mm;
             }
             .header h1 {
-              font-size: 14px;
+              font-size: 18px;
               font-weight: bold;
               margin-bottom: 2mm;
               line-height: 1.2;
             }
             .header p {
-              font-size: 9px;
+              font-size: 12px;
+              font-weight: bold;
               margin: 0;
             }
             .info {
               margin-bottom: 4mm;
-              font-size: 10px;
+              font-size: 12px;
+              font-weight: bold;
             }
             .info-row {
               display: flex;
@@ -111,15 +114,17 @@ export function InvoiceModal({ open, onOpenChange, sale }: InvoiceModalProps) {
               width: 100%;
               border-collapse: collapse;
               margin-bottom: 4mm;
-              font-size: 10px;
+              font-size: 12px;
+              font-weight: bold;
             }
             th, td {
               padding: 1mm 0;
               text-align: left;
+              font-weight: bold;
             }
             th {
               border-bottom: 1px dashed #000;
-              font-size: 9px;
+              font-size: 12px;
             }
             td:first-child {
               max-width: 35mm;
@@ -137,10 +142,11 @@ export function InvoiceModal({ open, onOpenChange, sale }: InvoiceModalProps) {
               display: flex;
               justify-content: space-between;
               margin-bottom: 1mm;
-              font-size: 10px;
+              font-size: 12px;
+              font-weight: bold;
             }
             .total-row.grand {
-              font-size: 12px;
+              font-size: 15px;
               font-weight: bold;
               margin-top: 3mm;
               padding-top: 3mm;
@@ -149,7 +155,8 @@ export function InvoiceModal({ open, onOpenChange, sale }: InvoiceModalProps) {
             .footer {
               text-align: center;
               margin-top: 4mm;
-              font-size: 9px;
+              font-size: 12px;
+              font-weight: bold;
             }
             .divider {
               border-top: 1px dashed #000;
