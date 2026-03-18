@@ -15,8 +15,14 @@ import { useStore } from "@/contexts/store-context"
 export function RecentSales() {
   const { sales } = useStore()
   
-  // Obtener las últimas 5 ventas
-  const recentSales = sales.slice(0, 5)
+  // Obtener las últimas 5 ventas (más recientes primero)
+  const recentSales = [...sales]
+    .sort((a, b) => {
+      const dateA = a.created_at ? new Date(a.created_at).getTime() : 0
+      const dateB = b.created_at ? new Date(b.created_at).getTime() : 0
+      return dateB - dateA
+    })
+    .slice(0, 5)
 
   return (
     <Card className="border-border shadow-sm">

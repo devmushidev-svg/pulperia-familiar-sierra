@@ -11,9 +11,24 @@ export function DashboardCards() {
 
   // Calcular estadísticas reales
   const totalProducts = products.length
+  const today = new Date()
+  const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime()
+  const todayEnd = todayStart + 24 * 60 * 60 * 1000
+
   const todaySales = sales.filter((sale) => {
-    const today = new Date().toLocaleDateString("es-HN")
-    return sale.date.includes(today)
+    const saleDate = sale.created_at ? new Date(sale.created_at).getTime() : null
+    if (saleDate !== null) {
+      return saleDate >= todayStart && saleDate < todayEnd
+    }
+    const datePart = sale.date?.split(",")[0]?.trim()
+    if (datePart) {
+      const [day, month, year] = datePart.split("/").map(Number)
+      if (day && month && year) {
+        const parsed = new Date(year, month - 1, day).getTime()
+        return parsed >= todayStart && parsed < todayEnd
+      }
+    }
+    return false
   })
   const todaySalesCount = todaySales.length
   const todayRevenue = todaySales.reduce((sum, sale) => sum + sale.total, 0)

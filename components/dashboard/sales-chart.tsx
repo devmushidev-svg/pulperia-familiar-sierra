@@ -9,18 +9,48 @@ import {
   YAxis,
   Tooltip,
 } from "recharts"
+import { useStore } from "@/contexts/store-context"
+import { useMemo } from "react"
 
-const data = [
-  { name: "Lun", ventas: 12000 },
-  { name: "Mar", ventas: 19000 },
-  { name: "Mié", ventas: 15000 },
-  { name: "Jue", ventas: 22000 },
-  { name: "Vie", ventas: 28000 },
-  { name: "Sáb", ventas: 35000 },
-  { name: "Dom", ventas: 18000 },
-]
+const DAY_NAMES = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"]
 
 export function SalesChart() {
+  const { sales } = useStore()
+
+  const data = useMemo(() => {
+    const today = new Date()
+    const result = []
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today)
+      d.setDate(d.getDate() - i)
+      const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
+      const dayEnd = dayStart + 24 * 60 * 60 * 1000 - 1
+
+      const daySales = sales.filter((sale) => {
+        const saleTime = sale.created_at ? new Date(sale.created_at).getTime() : null
+        if (saleTime !== null) {
+          return saleTime >= dayStart && saleTime <= dayEnd
+        }
+        const datePart = sale.date?.split(",")[0]?.trim()
+        if (datePart) {
+          const [day, month, year] = datePart.split("/").map(Number)
+          if (day && month && year) {
+            const parsed = new Date(year, month - 1, day).getTime()
+            return parsed >= dayStart && parsed <= dayEnd
+          }
+        }
+        return false
+      })
+
+      const total = daySales.reduce((sum, s) => sum + s.total, 0)
+      result.push({
+        name: DAY_NAMES[d.getDay()],
+        ventas: total,
+        fecha: d.toLocaleDateString("es-HN"),
+      })
+    }
+    return result
+  }, [sales])
   return (
     <Card className="border-border shadow-sm">
       <CardHeader>
