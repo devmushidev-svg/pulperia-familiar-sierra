@@ -2,6 +2,7 @@
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
@@ -41,7 +42,14 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-background">
+      <div className="flex h-screen w-full flex-col items-center justify-center gap-6 bg-background">
+        <Image
+          src="/images/logo-icono.png"
+          alt="Pulpería Familiar Sierra"
+          width={80}
+          height={80}
+          className="object-contain opacity-90"
+        />
         <Spinner className="h-8 w-8 text-primary" />
       </div>
     )

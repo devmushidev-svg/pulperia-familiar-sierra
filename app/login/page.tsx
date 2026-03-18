@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Store, Loader2, AlertCircle, User, Lock } from "lucide-react"
+import Image from "next/image"
+import { Loader2, AlertCircle, User, Lock } from "lucide-react"
 
 export default function LoginPage() {
   const [username, setUsername] = useState("")
@@ -38,10 +39,15 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-sm border-border shadow-lg">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-primary">
-            <Store className="h-7 w-7 text-primary-foreground" />
+          <div className="mx-auto mb-4 flex justify-center">
+            <Image
+              src="/images/logo-con-letras.png"
+              alt="Pulpería Familiar Sierra"
+              width={200}
+              height={100}
+              className="object-contain"
+            />
           </div>
-          <CardTitle className="text-xl text-card-foreground">Pulperia Familiar Sierra</CardTitle>
           <CardDescription>Ingresa tus credenciales</CardDescription>
         </CardHeader>
         <CardContent>

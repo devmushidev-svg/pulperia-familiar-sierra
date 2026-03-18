@@ -2,13 +2,13 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import Image from "next/image"
 import {
   LayoutDashboard,
   Package,
   ShoppingCart,
   BarChart3,
   Settings,
-  Store,
   LogOut,
 } from "lucide-react"
 import {
@@ -71,12 +71,18 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader className="border-b border-sidebar-border p-4">
         <Link href="/" className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-            <Store className="h-5 w-5 text-primary-foreground" />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg">
+            <Image
+              src="/images/logo-icono.png"
+              alt="Pulpería Familiar Sierra"
+              width={40}
+              height={40}
+              className="object-contain"
+            />
           </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-semibold text-sidebar-foreground">Pulpería Familiar</span>
-            <span className="text-xs text-sidebar-foreground/70">Sierra</span>
+          <div className="flex flex-col min-w-0">
+            <span className="text-sm font-semibold text-sidebar-foreground truncate">Pulpería Familiar</span>
+            <span className="text-xs text-sidebar-foreground/70 truncate">Sierra</span>
           </div>
         </Link>
       </SidebarHeader>

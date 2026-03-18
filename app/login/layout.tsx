@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { AuthProvider, useAuth } from "@/contexts/auth-context"
 import { Spinner } from "@/components/ui/spinner"
@@ -17,7 +18,14 @@ function LoginLayoutContent({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-background">
+      <div className="flex h-screen w-full flex-col items-center justify-center gap-6 bg-background">
+        <Image
+          src="/images/logo-icono.png"
+          alt="Pulpería Familiar Sierra"
+          width={72}
+          height={72}
+          className="object-contain opacity-90"
+        />
         <Spinner className="h-8 w-8 text-primary" />
       </div>
     )
