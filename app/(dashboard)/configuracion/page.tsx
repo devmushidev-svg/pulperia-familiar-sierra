@@ -35,16 +35,16 @@ export default function ConfiguracionPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label htmlFor="phone">Teléfono</Label>
-              <Input id="phone" defaultValue="+506 8888-8888" />
+              <Input id="phone" defaultValue="+504 2234-5678" />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="email">Correo Electrónico</Label>
-              <Input id="email" type="email" defaultValue="pulperia@sierra.cr" />
+              <Input id="email" type="email" defaultValue="pulperia@sierra.hn" />
             </div>
           </div>
           <div className="grid gap-2">
             <Label htmlFor="address">Dirección</Label>
-            <Input id="address" defaultValue="San José, Costa Rica" />
+            <Input id="address" defaultValue="Honduras" />
           </div>
           <div className="pt-2">
             <Button>Guardar Cambios</Button>

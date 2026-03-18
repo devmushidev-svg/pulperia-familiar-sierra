@@ -177,7 +177,8 @@ export function InvoiceModal({ open, onOpenChange, sale }: InvoiceModalProps) {
               <h1>Pulpería Familiar Sierra</h1>
               <p>RTN: 0801-1234-56789</p>
               <p>Tel: +504 2234-5678</p>
-              <p>Tegucigalpa, Honduras</p>
+              <p>Correo: pulperia@sierra.hn</p>
+              <p>Dirección: Honduras</p>
             </div>
             
             <div class="divider"></div>
@@ -262,7 +263,8 @@ export function InvoiceModal({ open, onOpenChange, sale }: InvoiceModalProps) {
             <h2 className="text-lg font-bold">Pulpería Familiar Sierra</h2>
             <p className="text-xs text-muted-foreground">RTN: 0801-1234-56789</p>
             <p className="text-xs text-muted-foreground">Tel: +504 2234-5678</p>
-            <p className="text-xs text-muted-foreground">Tegucigalpa, Honduras</p>
+            <p className="text-xs text-muted-foreground">Correo: pulperia@sierra.hn</p>
+            <p className="text-xs text-muted-foreground">Dirección: Honduras</p>
           </div>
 
           <Separator />

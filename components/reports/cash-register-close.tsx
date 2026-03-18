@@ -105,7 +105,8 @@ export function CashRegisterClose() {
       <body>
         <div class="header">
           <div class="title">PULPERIA FAMILIAR SIERRA</div>
-          <div class="subtitle">Cierre de Caja Diario</div>
+          <div class="subtitle">Tel: +504 2234-5678 | Correo: pulperia@sierra.hn</div>
+          <div class="subtitle">Dirección: Honduras</div>
         </div>
         
         <div class="section">
