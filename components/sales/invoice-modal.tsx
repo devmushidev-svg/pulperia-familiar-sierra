@@ -43,33 +43,65 @@ export function InvoiceModal({ open, onOpenChange, sale }: InvoiceModalProps) {
       <html>
         <head>
           <title>Factura ${sale.id} - Pulpería Familiar Sierra</title>
+          <meta charset="UTF-8">
           <style>
+            /* Estilos optimizados para impresora térmica 80mm */
+            @page {
+              size: 80mm auto;
+              margin: 0;
+            }
             * {
               margin: 0;
               padding: 0;
               box-sizing: border-box;
             }
-            body {
-              font-family: 'Courier New', monospace;
-              font-size: 12px;
+            html, body {
               width: 80mm;
-              padding: 10px;
+              min-width: 80mm;
+              max-width: 80mm;
+              margin: 0;
+              padding: 0;
+              font-family: 'Courier New', Courier, monospace;
+              font-size: 11px;
+              line-height: 1.2;
+              color: #000;
+              background: #fff;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            @media print {
+              html, body {
+                width: 80mm !important;
+                min-width: 80mm !important;
+                max-width: 80mm !important;
+                margin: 0 !important;
+                padding: 2mm !important;
+                overflow: hidden;
+              }
+            }
+            .receipt {
+              width: 76mm;
+              max-width: 76mm;
+              padding: 2mm;
+              margin: 0 auto;
             }
             .header {
               text-align: center;
-              margin-bottom: 15px;
+              margin-bottom: 4mm;
             }
             .header h1 {
-              font-size: 16px;
-              margin-bottom: 5px;
+              font-size: 14px;
+              font-weight: bold;
+              margin-bottom: 2mm;
+              line-height: 1.2;
             }
             .header p {
-              font-size: 10px;
-              color: #666;
+              font-size: 9px;
+              margin: 0;
             }
             .info {
-              margin-bottom: 15px;
-              font-size: 11px;
+              margin-bottom: 4mm;
+              font-size: 10px;
             }
             .info-row {
               display: flex;
@@ -78,108 +110,117 @@ export function InvoiceModal({ open, onOpenChange, sale }: InvoiceModalProps) {
             table {
               width: 100%;
               border-collapse: collapse;
-              margin-bottom: 15px;
+              margin-bottom: 4mm;
+              font-size: 10px;
             }
             th, td {
+              padding: 1mm 0;
               text-align: left;
-              padding: 4px 0;
-              font-size: 11px;
             }
             th {
               border-bottom: 1px dashed #000;
+              font-size: 9px;
+            }
+            td:first-child {
+              max-width: 35mm;
+              overflow: hidden;
+              text-overflow: ellipsis;
             }
             .text-right {
               text-align: right;
             }
             .totals {
               border-top: 1px dashed #000;
-              padding-top: 10px;
+              padding-top: 3mm;
             }
             .total-row {
               display: flex;
               justify-content: space-between;
-              margin-bottom: 4px;
+              margin-bottom: 1mm;
+              font-size: 10px;
             }
             .total-row.grand {
-              font-size: 14px;
+              font-size: 12px;
               font-weight: bold;
-              margin-top: 8px;
-              padding-top: 8px;
-              border-top: 1px dashed #000;
+              margin-top: 3mm;
+              padding-top: 3mm;
+              border-top: 1px solid #000;
             }
             .footer {
               text-align: center;
-              margin-top: 20px;
-              font-size: 10px;
+              margin-top: 4mm;
+              font-size: 9px;
             }
             .divider {
               border-top: 1px dashed #000;
-              margin: 10px 0;
+              margin: 3mm 0;
             }
           </style>
         </head>
         <body>
-          <div class="header">
-            <h1>Pulpería Familiar Sierra</h1>
-            <p>RTN: 0801-1234-56789</p>
-            <p>Tel: +504 2234-5678</p>
-            <p>Tegucigalpa, Honduras</p>
-          </div>
-          
-          <div class="divider"></div>
-          
-          <div class="info">
-            <div class="info-row">
-              <span>Factura No:</span>
-              <span>${sale.id}</span>
+          <div class="receipt">
+            <div class="header">
+              <h1>Pulpería Familiar Sierra</h1>
+              <p>RTN: 0801-1234-56789</p>
+              <p>Tel: +504 2234-5678</p>
+              <p>Tegucigalpa, Honduras</p>
             </div>
-            <div class="info-row">
-              <span>Fecha:</span>
-              <span>${sale.date}</span>
+            
+            <div class="divider"></div>
+            
+            <div class="info">
+              <div class="info-row">
+                <span>Factura No:</span>
+                <span>${sale.id}</span>
+              </div>
+              <div class="info-row">
+                <span>Fecha:</span>
+                <span>${sale.date}</span>
+              </div>
             </div>
-          </div>
-          
-          <div class="divider"></div>
-          
-          <table>
-            <thead>
-              <tr>
-                <th>Producto</th>
-                <th class="text-right">Cant.</th>
-                <th class="text-right">Precio</th>
-                <th class="text-right">Subt.</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${sale.items.map((item) => `
+            
+            <div class="divider"></div>
+            
+            <table>
+              <thead>
                 <tr>
-                  <td>${item.productName}</td>
-                  <td class="text-right">${item.quantity}</td>
-                  <td class="text-right">L ${item.price.toFixed(2)}</td>
-                  <td class="text-right">L ${item.subtotal.toFixed(2)}</td>
+                  <th>Producto</th>
+                  <th class="text-right">Cant.</th>
+                  <th class="text-right">Precio</th>
+                  <th class="text-right">Subt.</th>
                 </tr>
-              `).join("")}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                ${sale.items.map((item) => `
+                  <tr>
+                    <td>${item.productName}</td>
+                    <td class="text-right">${item.quantity}</td>
+                    <td class="text-right">L ${item.price.toFixed(2)}</td>
+                    <td class="text-right">L ${item.subtotal.toFixed(2)}</td>
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>
+            
+            <div class="totals">
+              <div class="total-row">
+                <span>Subtotal:</span>
+                <span>L ${sale.subtotal.toFixed(2)}</span>
+              </div>
+              <div class="total-row">
+                <span>ISV (15%):</span>
+                <span>L ${sale.tax.toFixed(2)}</span>
+              </div>
+              <div class="total-row grand">
+                <span>TOTAL:</span>
+                <span>L ${sale.total.toFixed(2)}</span>
+              </div>
+            </div>
           
-          <div class="totals">
-            <div class="total-row">
-              <span>Subtotal:</span>
-              <span>L ${sale.subtotal.toFixed(2)}</span>
+            <div class="footer">
+              <p>¡Gracias por su compra!</p>
+              <p>Vuelva pronto</p>
             </div>
-            <div class="total-row">
-              <span>ISV (15%):</span>
-              <span>L ${sale.tax.toFixed(2)}</span>
-            </div>
-            <div class="total-row grand">
-              <span>TOTAL:</span>
-              <span>L ${sale.total.toFixed(2)}</span>
-            </div>
-          </div>
-          
-          <div class="footer">
-            <p>¡Gracias por su compra!</p>
-            <p>Vuelva pronto</p>
           </div>
         </body>
       </html>
@@ -280,14 +321,19 @@ export function InvoiceModal({ open, onOpenChange, sale }: InvoiceModalProps) {
         </div>
 
         {/* Print Button */}
-        <div className="flex gap-2 pt-4">
-          <Button onClick={handlePrint} className="flex-1">
-            <Printer className="mr-2 h-4 w-4" />
-            Imprimir Factura
-          </Button>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cerrar
-          </Button>
+        <div className="space-y-2 pt-4">
+          <div className="flex gap-2">
+            <Button onClick={handlePrint} className="flex-1">
+              <Printer className="mr-2 h-4 w-4" />
+              Imprimir Factura
+            </Button>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Cerrar
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground text-center">
+            Impresora térmica 80mm: en el cuadro de impresión seleccione &quot;Tamaño real&quot; o &quot;100%&quot;
+          </p>
         </div>
       </DialogContent>
     </Dialog>
