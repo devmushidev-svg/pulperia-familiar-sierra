@@ -30,10 +30,10 @@ type ProductDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   product: Product | null
-  onSave: (product: Omit<Product, "id">) => void
+  onSave: (product: Omit<Product, "id">) => void | Promise<void>
 }
 
-const categories = ["Bebidas", "Lácteos", "Abarrotes", "Panadería", "Limpieza", "Snacks", "Huevos", "Granos", "Higiene"]
+const categories = ["Bebidas", "Lácteos", "Abarrotes", "Panadería", "Aceites", "Limpieza", "Snacks", "Huevos", "Granos", "Higiene"]
 
 export function ProductDialog({ open, onOpenChange, product, onSave }: ProductDialogProps) {
   const [nombre, setNombre] = useState("")
@@ -58,9 +58,9 @@ export function ProductDialog({ open, onOpenChange, product, onSave }: ProductDi
     }
   }, [product, open])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    onSave({
+    await onSave({
       nombre,
       categoria,
       precio: parseFloat(precio),

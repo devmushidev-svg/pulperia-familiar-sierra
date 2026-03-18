@@ -18,6 +18,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ShoppingCart as ShoppingCartIcon } from "lucide-react"
 import { useStore, type CartItem, type Sale } from "@/contexts/store-context"
 import { Spinner } from "@/components/ui/spinner"
+import { toast } from "sonner"
 
 export type { CartItem, Sale } from "@/contexts/store-context"
 export type { Product } from "@/contexts/store-context"
@@ -27,6 +28,7 @@ export default function VentasPage() {
   const [cart, setCart] = useState<CartItem[]>([])
   const [invoiceModalOpen, setInvoiceModalOpen] = useState(false)
   const [currentInvoice, setCurrentInvoice] = useState<Sale | null>(null)
+  const [isFinalizing, setIsFinalizing] = useState(false)
 
   if (!isLoaded) {
     return (
@@ -88,26 +90,30 @@ export default function VentasPage() {
     setCart([])
   }
 
-  const handleFinalizeSale = () => {
+  const handleFinalizeSale = async () => {
     if (cart.length === 0) return
 
-    const newSale = addSale({
-      items: [...cart],
-      subtotal,
-      tax,
-      total,
-      date: new Date().toLocaleString("es-HN", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    })
+    setIsFinalizing(true)
+    try {
+      const newSale = await addSale({
+        items: [...cart],
+        subtotal,
+        tax,
+        total,
+        date: new Date().toISOString(),
+      })
 
-    setCurrentInvoice(newSale)
-    setInvoiceModalOpen(true)
-    setCart([])
+      setCurrentInvoice(newSale)
+      setInvoiceModalOpen(true)
+      setCart([])
+      toast.success("Venta registrada correctamente")
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Error al registrar la venta"
+      toast.error(msg)
+      console.error("Error al registrar venta:", e)
+    } finally {
+      setIsFinalizing(false)
+    }
   }
 
   const handleViewInvoice = (sale: Sale) => {
@@ -147,6 +153,7 @@ export default function VentasPage() {
                 hasItems={cart.length > 0}
                 onFinalize={handleFinalizeSale}
                 onCancel={handleCancelSale}
+                isFinalizing={isFinalizing}
               />
             </div>
           </div>

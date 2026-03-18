@@ -14,8 +14,9 @@ import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/s
 import { Separator } from "@/components/ui/separator"
 import { usePathname } from "next/navigation"
 import { AuthProvider, useAuth } from "@/contexts/auth-context"
-import { StoreProvider } from "@/contexts/store-context"
+import { StoreProvider, useStore } from "@/contexts/store-context"
 import { Spinner } from "@/components/ui/spinner"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 const pageNames: Record<string, string> = {
   "/": "Panel de Control",
@@ -45,6 +46,8 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
     }
   }, [pathname, isLoading, user, isAdmin, router])
 
+  const { error } = useStore()
+
   if (isLoading) {
     return (
       <div className="flex h-screen w-full flex-col items-center justify-center gap-6 bg-background">
@@ -68,6 +71,14 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
+        {error && (
+          <Alert variant="destructive" className="m-4">
+            <AlertDescription>
+              {error}. Verifica que Supabase esté configurado en .env.local y que hayas ejecutado
+              scripts/001_create_tables.sql en el SQL Editor de Supabase.
+            </AlertDescription>
+          </Alert>
+        )}
         <header className="flex h-16 shrink-0 items-center gap-2 border-b border-border bg-card px-4">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />

@@ -6,7 +6,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { Check, X, Calculator } from "lucide-react"
+import { Check, X, Calculator, Loader2 } from "lucide-react"
 
 type SaleSummaryProps = {
   subtotal: number
@@ -15,6 +15,7 @@ type SaleSummaryProps = {
   hasItems: boolean
   onFinalize: () => void
   onCancel: () => void
+  isFinalizing?: boolean
 }
 
 export function SaleSummary({
@@ -24,6 +25,7 @@ export function SaleSummary({
   hasItems,
   onFinalize,
   onCancel,
+  isFinalizing = false,
 }: SaleSummaryProps) {
   return (
     <div className="space-y-4">
@@ -62,10 +64,14 @@ export function SaleSummary({
           className="w-full"
           size="lg"
           onClick={onFinalize}
-          disabled={!hasItems}
+          disabled={!hasItems || isFinalizing}
         >
-          <Check className="mr-2 h-4 w-4" />
-          Finalizar Venta
+          {isFinalizing ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Check className="mr-2 h-4 w-4" />
+          )}
+          {isFinalizing ? "Procesando..." : "Finalizar Venta"}
         </Button>
 
         <Button

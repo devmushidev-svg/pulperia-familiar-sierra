@@ -16,7 +16,8 @@ CREATE TABLE IF NOT EXISTS ventas (
   subtotal DECIMAL(10,2) NOT NULL,
   isv DECIMAL(10,2) NOT NULL,
   total DECIMAL(10,2) NOT NULL,
-  fecha TIMESTAMPTZ DEFAULT NOW()
+  fecha TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Tabla de detalle de ventas
@@ -36,19 +37,27 @@ ALTER TABLE ventas ENABLE ROW LEVEL SECURITY;
 ALTER TABLE detalle_ventas ENABLE ROW LEVEL SECURITY;
 
 -- Politicas para permitir todas las operaciones (app de demo sin auth de Supabase)
+DROP POLICY IF EXISTS "Allow all on productos" ON productos;
 CREATE POLICY "Allow all on productos" ON productos FOR ALL USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "Allow all on ventas" ON ventas;
 CREATE POLICY "Allow all on ventas" ON ventas FOR ALL USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "Allow all on detalle_ventas" ON detalle_ventas;
 CREATE POLICY "Allow all on detalle_ventas" ON detalle_ventas FOR ALL USING (true) WITH CHECK (true);
 
--- Insertar productos de ejemplo
-INSERT INTO productos (nombre, categoria, precio, stock, stock_minimo) VALUES
-  ('Coca-Cola 600ml', 'Bebidas', 25.00, 48, 10),
-  ('Leche Sula 1L', 'Lacteos', 32.50, 24, 10),
-  ('Arroz Progreso 1kg', 'Granos', 28.00, 36, 15),
-  ('Pan Bimbo Blanco', 'Panaderia', 45.00, 18, 8),
-  ('Huevos Docena', 'Lacteos', 65.00, 20, 10),
-  ('Frijoles Naturas 400g', 'Granos', 22.00, 30, 12),
-  ('Aceite Mazola 750ml', 'Aceites', 85.00, 15, 5),
-  ('Azucar Cana Real 1kg', 'Granos', 18.00, 40, 15),
-  ('Cafe Oro 200g', 'Bebidas', 55.00, 25, 8),
-  ('Jabon Palmolive', 'Higiene', 28.00, 35, 10);
+-- Insertar productos de ejemplo (solo si la tabla está vacía)
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM productos LIMIT 1) THEN
+    INSERT INTO productos (nombre, categoria, precio, stock, stock_minimo) VALUES
+    ('Coca-Cola 600ml', 'Bebidas', 25.00, 48, 10),
+    ('Leche Sula 1L', 'Lacteos', 32.50, 24, 10),
+    ('Arroz Progreso 1kg', 'Granos', 28.00, 36, 15),
+    ('Pan Bimbo Blanco', 'Panaderia', 45.00, 18, 8),
+    ('Huevos Docena', 'Lacteos', 65.00, 20, 10),
+    ('Frijoles Naturas 400g', 'Granos', 22.00, 30, 12),
+    ('Aceite Mazola 750ml', 'Aceites', 85.00, 15, 5),
+    ('Azucar Cana Real 1kg', 'Granos', 18.00, 40, 15),
+    ('Cafe Oro 200g', 'Bebidas', 55.00, 25, 8),
+    ('Jabon Palmolive', 'Higiene', 28.00, 35, 10);
+  END IF;
+END $$;

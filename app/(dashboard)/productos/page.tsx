@@ -38,20 +38,32 @@ export default function ProductosPage() {
       product.categoria.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  const handleAddProduct = (product: Omit<Product, "id">) => {
-    addProduct(product)
-    setDialogOpen(false)
+  const handleAddProduct = async (product: Omit<Product, "id">) => {
+    try {
+      await addProduct(product)
+      setDialogOpen(false)
+    } catch (e) {
+      console.error("Error al agregar producto:", e)
+    }
   }
 
-  const handleEditProduct = (product: Omit<Product, "id">) => {
+  const handleEditProduct = async (product: Omit<Product, "id">) => {
     if (!editingProduct) return
-    updateProduct({ ...product, id: editingProduct.id })
-    setEditingProduct(null)
-    setDialogOpen(false)
+    try {
+      await updateProduct({ ...product, id: editingProduct.id })
+      setEditingProduct(null)
+      setDialogOpen(false)
+    } catch (e) {
+      console.error("Error al actualizar producto:", e)
+    }
   }
 
-  const handleDeleteProduct = (id: string) => {
-    deleteProduct(id)
+  const handleDeleteProduct = async (id: string) => {
+    try {
+      await deleteProduct(id)
+    } catch (e) {
+      console.error("Error al eliminar producto:", e)
+    }
   }
 
   const openEditDialog = (product: Product) => {

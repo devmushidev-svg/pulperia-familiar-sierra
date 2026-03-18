@@ -1,6 +1,20 @@
 # Pulpería Familiar Sierra - Documentación Técnica
 
-Sistema de gestión de ventas e inventario para pulpería. Next.js 16, React 19, persistencia en localStorage.
+Sistema de gestión de ventas e inventario para pulpería. Next.js 16, React 19, persistencia en Supabase (PostgreSQL en la nube).
+
+---
+
+## Configuración de Supabase
+
+1. Crear proyecto en [supabase.com](https://supabase.com)
+2. En Settings → API copiar `Project URL` y `anon public` key
+3. Crear `.env.local` con:
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key
+   ```
+4. En Supabase Dashboard → SQL Editor, ejecutar `scripts/001_create_tables.sql`
+5. Si ves "column ventas.created_at does not exist", ejecutar `scripts/002_add_created_at_ventas.sql`
 
 ---
 
@@ -21,7 +35,8 @@ app/
     └── configuracion/  → Opciones (solo admin)
 
 lib/
-└── database.ts         → Capa de persistencia (localStorage)
+├── database.ts         → Re-exporta capa Supabase
+└── supabase-database.ts → Operaciones CRUD contra Supabase
 
 contexts/
 ├── auth-context.tsx    → Usuario, login, logout, isAdmin
@@ -43,9 +58,9 @@ contexts/
 - **Protección**: Dashboard layout redirige a /login si no hay usuario
 
 ### Tienda (contexts/store-context.tsx)
-- **Hidratación**: Al montar, db.init() + refreshProducts + refreshSales
-- **Operaciones**: addProduct, updateProduct, deleteProduct, addSale
-- **addSale**: Persiste venta, actualiza stock, refresca productos y ventas
+- **Hidratación**: Al montar, carga async desde Supabase (refreshProducts, refreshSales)
+- **Operaciones**: addProduct, updateProduct, deleteProduct, addSale (todas async)
+- **addSale**: Persiste venta en la nube, actualiza stock, refresca productos y ventas
 
 ---
 
@@ -88,4 +103,4 @@ contexts/
 - Next.js 16, React 19
 - Tailwind CSS, Radix UI (shadcn/ui)
 - Recharts (gráficos)
-- localStorage (persistencia)
+- Supabase (PostgreSQL en la nube)

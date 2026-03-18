@@ -3,9 +3,9 @@
 /**
  * Contexto global de la tienda (productos y ventas).
  *
- * Proceso: Al montar, inicializa la base de datos e hidrata el estado con productos
- * y ventas desde localStorage. Expone operaciones CRUD que delegan en db y refrescan
- * el estado. addSale además actualiza el stock de productos vendidos.
+ * Proceso: Al montar, carga productos y ventas desde Supabase. Expone operaciones
+ * CRUD async que persisten en la nube y refrescan el estado. addSale actualiza
+ * el stock de productos vendidos.
  */
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react"
@@ -27,15 +27,16 @@ type StoreContextType = {
   products: Product[]
   sales: Sale[]
   isLoaded: boolean
-  refreshProducts: () => void
-  refreshSales: () => void
-  addProduct: (product: Omit<Product, "id" | "created_at" | "updated_at">) => void
-  updateProduct: (product: Product) => void
-  deleteProduct: (id: string) => void
-  addSale: (sale: { items: CartItem[]; subtotal: number; tax: number; total: number; date: string }) => Sale
+  error: string | null
+  refreshProducts: () => Promise<void>
+  refreshSales: () => Promise<void>
+  addProduct: (product: Omit<Product, "id" | "created_at" | "updated_at">) => Promise<void>
+  updateProduct: (product: Product) => Promise<void>
+  deleteProduct: (id: string) => Promise<void>
+  addSale: (sale: { items: CartItem[]; subtotal: number; tax: number; total: number; date: string }) => Promise<Sale>
   getSaleById: (id: string) => Sale | undefined
-  getSchema: () => { tableName: string; columns: string[]; rowCount: number }[]
-  executeQuery: (tableName: string) => Record<string, unknown>[]
+  getSchema: () => Promise<{ tableName: string; columns: string[]; rowCount: number }[]>
+  executeQuery: (tableName: string) => Promise<Record<string, unknown>[]>
 }
 
 const StoreContext = createContext<StoreContextType | null>(null)
@@ -44,58 +45,99 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<Product[]>([])
   const [sales, setSales] = useState<Sale[]>([])
   const [isLoaded, setIsLoaded] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const refreshProducts = useCallback(() => {
-    const data = db.selectAllProducts()
-    setProducts(data)
+  const refreshProducts = useCallback(async () => {
+    try {
+      setError(null)
+      const data = await db.selectAllProducts()
+      setProducts(data)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Error cargando productos")
+      setProducts([])
+    }
   }, [])
 
-  const refreshSales = useCallback(() => {
-    const data = db.selectAllSalesWithDetails()
-    setSales(data)
+  const refreshSales = useCallback(async () => {
+    try {
+      setError(null)
+      const data = await db.selectAllSalesWithDetails()
+      setSales(data)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Error cargando ventas")
+      setSales([])
+    }
   }, [])
 
-  // Cargar datos iniciales
   useEffect(() => {
-    db.init()
-    refreshProducts()
-    refreshSales()
-    setIsLoaded(true)
+    let cancelled = false
+    const load = async () => {
+      try {
+        await db.init()
+        await refreshProducts()
+        await refreshSales()
+        if (!cancelled) setIsLoaded(true)
+      } catch (e) {
+        if (!cancelled) {
+          setError(e instanceof Error ? e.message : "Error conectando con la base de datos")
+          setIsLoaded(true)
+        }
+      }
+    }
+    load()
+    return () => {
+      cancelled = true
+    }
   }, [refreshProducts, refreshSales])
 
-  const addProduct = (product: Omit<Product, "id" | "created_at" | "updated_at">) => {
-    db.insertProduct(product)
-    refreshProducts()
-  }
+  const addProduct = useCallback(
+    async (product: Omit<Product, "id" | "created_at" | "updated_at">) => {
+      await db.insertProduct(product)
+      await refreshProducts()
+    },
+    [refreshProducts]
+  )
 
-  const updateProduct = (product: Product) => {
-    db.updateProduct(product.id, product)
-    refreshProducts()
-  }
+  const updateProduct = useCallback(
+    async (product: Product) => {
+      await db.updateProduct(product.id, product)
+      await refreshProducts()
+    },
+    [refreshProducts]
+  )
 
-  const deleteProduct = (id: string) => {
-    db.deleteProduct(id)
-    refreshProducts()
-  }
+  const deleteProduct = useCallback(
+    async (id: string) => {
+      await db.deleteProduct(id)
+      await refreshProducts()
+    },
+    [refreshProducts]
+  )
 
-  const addSale = (sale: { items: CartItem[]; subtotal: number; tax: number; total: number; date: string }) => {
-    const newSale = db.insertSale(sale)
-    refreshProducts()
-    refreshSales()
-    return newSale
-  }
+  const addSale = useCallback(
+    async (sale: { items: CartItem[]; subtotal: number; tax: number; total: number; date: string }) => {
+      const newSale = await db.insertSale(sale)
+      await refreshProducts()
+      await refreshSales()
+      return newSale
+    },
+    [refreshProducts, refreshSales]
+  )
 
-  const getSaleById = (id: string) => {
-    return sales.find((s) => s.id === id)
-  }
+  const getSaleById = useCallback(
+    (id: string) => {
+      return sales.find((s) => s.id === id)
+    },
+    [sales]
+  )
 
-  const getSchema = () => {
-    return db.getSchema()
-  }
+  const getSchema = useCallback(async () => {
+    return await db.getSchema()
+  }, [])
 
-  const executeQuery = (tableName: string) => {
-    return db.executeQuery(tableName)
-  }
+  const executeQuery = useCallback(async (tableName: string) => {
+    return await db.executeQuery(tableName)
+  }, [])
 
   return (
     <StoreContext.Provider
@@ -103,6 +145,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         products,
         sales,
         isLoaded,
+        error,
         refreshProducts,
         refreshSales,
         addProduct,

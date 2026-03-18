@@ -7,6 +7,7 @@ import type { Metadata } from 'next'
 import { Inter, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { AppInitializer } from '@/components/app-initializer'
+import { Toaster } from '@/components/ui/sonner'
 import './globals.css'
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -42,6 +43,7 @@ export default function RootLayout({
         <AppInitializer>
           {children}
         </AppInitializer>
+        <Toaster richColors position="top-center" />
         <Analytics />
       </body>
     </html>
