@@ -228,7 +228,7 @@ export function CashRegisterClose() {
       </Card>
 
       <Dialog open={showCloseModal} onOpenChange={setShowCloseModal}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Calculator className="h-5 w-5 text-primary" />
@@ -239,15 +239,15 @@ export function CashRegisterClose() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-4 overflow-y-auto overflow-x-hidden flex flex-col min-h-0 flex-1">
             {todaySales.length === 0 ? (
               <div className="py-8 text-center text-muted-foreground">
                 No hay ventas registradas hoy
               </div>
             ) : (
               <>
-                <div className="rounded-lg border border-border">
-                  <Table>
+                <div className="rounded-lg border border-border overflow-x-auto min-w-0">
+                  <Table className="min-w-[600px]">
                     <TableHeader>
                       <TableRow>
                         <TableHead>ID</TableHead>
@@ -287,10 +287,10 @@ export function CashRegisterClose() {
                   </Table>
                 </div>
 
-                <div className="rounded-lg bg-muted p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <div className="flex gap-8 text-sm">
+                <div className="rounded-lg bg-muted p-4 shrink-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="space-y-1 min-w-0">
+                      <div className="flex flex-wrap gap-4 sm:gap-8 text-sm">
                         <span className="text-muted-foreground">Subtotal: <strong className="text-card-foreground">L {subtotalDia.toLocaleString()}</strong></span>
                         <span className="text-muted-foreground">ISV (15%): <strong className="text-card-foreground">L {isvDia.toLocaleString()}</strong></span>
                       </div>
@@ -298,7 +298,7 @@ export function CashRegisterClose() {
                         Total en Caja: L {totalDia.toLocaleString()}
                       </div>
                     </div>
-                    <Button onClick={handlePrint}>
+                    <Button onClick={handlePrint} className="shrink-0">
                       <Printer className="mr-2 h-4 w-4" />
                       Imprimir Cierre
                     </Button>
